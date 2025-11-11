@@ -30,3 +30,5 @@ This tool provides an intuitive interface for real-time data visualization, remo
 
 Developed by Rarder44
 For bug reports or feature requests, feel free to open an issue or submit a pull request.
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/V7V1RKN6S)
