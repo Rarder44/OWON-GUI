@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace OWON_GUI.Classes
 {
-    internal class OwonSerialCom :INotifyPropertyChanged
+    public class OwonSerialCom :INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
@@ -17,8 +17,11 @@ namespace OWON_GUI.Classes
         }
 
 
-
+        
         private bool _isLocked  = false;
+        /**
+         * Gets or sets the state of the power supply's physical keypad
+         */
         public bool IsLocked
         {
             get
@@ -27,10 +30,6 @@ namespace OWON_GUI.Classes
             }
             set
             {
-                //TODO: invio il comando di lock/unlock
-                //richiedo lo stato corrente
-                //se è corretto allora cambio il valore, altrimenti...??? eccezione?
-
                 if (_isLocked != value)
                 {
                     _isLocked = value;
@@ -40,5 +39,29 @@ namespace OWON_GUI.Classes
         }
 
         
+        private bool _isPowered = false;
+        /**
+         * Gets or sets the output state ( true -> supplies current )
+         */
+        public bool IsPowered
+        {
+            get
+            {
+                return _isPowered;
+            }
+            set
+            {
+
+                if (_isPowered != value)
+                {
+                    _isPowered = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+
+
+
     }
 }

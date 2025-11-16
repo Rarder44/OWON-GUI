@@ -4,11 +4,13 @@
         xmlns:converters="using:OWON_GUI.Converter"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:local="using:OWON_GUI"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:system="using:System"
         mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="450"
         MinWidth="700" MinHeight="450"
         x:Class="OWON_GUI.MainWindow"
+        x:DataType="local:MainWindow"
         Title="OWON_GUI">
      <Window.Styles>
         
@@ -35,12 +37,53 @@
         <Style Selector="TextBox.FloatVal">
             <Setter Property="HorizontalContentAlignment" Value="Right"/>
         </Style>
-        <Style Selector="Button#btnOnOff.on">
-            <Setter Property="Background" Value="#038cfc"/>
+
+
+
+
+         <Style Selector="Button#btnOnOff">
+            <Setter Property="BorderBrush" Value="Black"/>
+            <Setter Property="Margin" Value="10,10,0,0"/>
+            <Setter Property="Width" Value="100"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="FontSize" Value="20"/>
+
+            <Style Selector="^:pointerover">
+               <Setter Property="Background" Value="LightBlue"/>
+            </Style>
+
+             <!-- Use tag for simple databinding True -> On | False -> Off -->
+            <Style Selector="^[Tag=True]">
+                <Setter Property="Background" Value="#038cfc"/>
+
+                 <!-- WTF is ContentPresenter?!? no sense -->
+                <Style Selector="^:pointerover /template/ ContentPresenter">
+                    <Setter Property="Background" Value="#FF05B2FF"/>
+                    <Setter Property="BorderBrush" Value="Black"/>
+
+                </Style>
+            </Style>
+            <Style Selector="^[Tag=False]">
+                <Setter Property="Background" Value="White"/>
+
+
+                <Style Selector="^:pointerover /template/ ContentPresenter">
+                    <Setter Property="Background" Value="#FF94DFFF"/>
+                    <Setter Property="BorderBrush" Value="Black"/>
+
+                </Style>
+            </Style>
+            
+
+            
+
+            
+
         </Style>
-         <Style Selector="Button#btnOnOff.off">
-            <Setter Property="Background" Value="White"/>
-        </Style>
+        
+         
+        
 
 
         <Style Selector="Path#svgLockStatus">
@@ -187,14 +230,14 @@
         </Border>
 
         <!--Controls -->
-        <Button HorizontalContentAlignment="Center"  Content="On/Off" Grid.Row="0" Grid.Column="3" Margin="10,10,0,0" HorizontalAlignment="Left" Width="100" Height="40" VerticalAlignment="Top" FontSize="20"  BorderBrush="Black" x:Name="btnOnOff" Classes="off" />
+        <Button Content="On/Off" Grid.Row="0" Grid.Column="3" x:Name="btnOnOff"  Tag="{Binding OwonSerialCom.IsPowered}" Click="btnOnOff_Click" />
 
 
         <!--Connection-->
         <Border Grid.Row="2" Grid.Column="0" Margin="10"  Padding="10">
             <StackPanel>
                 <ComboBox x:Name="comboBoxPort" Width="150" Height="30" Margin="0,0,0,10"/>
-                <Button Content="Connect"  x:Name="btnConnect" Width="150" HorizontalContentAlignment="Center"/>
+                <Button Content="Connect"  x:Name="btnConnect" Width="150" />
             </StackPanel>
         </Border>
 
@@ -218,37 +261,28 @@
                     <Label Content="SN" VerticalAlignment="Center"></Label>
                     <TextBox  Width="100" x:Name="txtSN" IsReadOnly="True" Margin="0 0 15 0"></TextBox>
 
+
+
                 </StackPanel>
                 
-                <!--<Path x:Name="svgLockStatus" Classes="lock" Grid.Column="1"
-                      
-                      x:DataType="classes:OwonSerialCom"
-                      IsVisible="{Binding IsLocked}"
-                      
-                      />
-                
-                -->
-
-
                  
 
 
                 <controls:Padlock 
                     x:Name="svgLockStatus"
-                    x:DataType="classes:OwonSerialCom"
-                    IsLocked="{Binding IsLocked}" 
+                    IsLocked="{Binding OwonSerialCom.IsLocked}" 
                     VerticalAlignment="Center" 
                     Grid.Column="1"
                     
                     />
+                 
 
 
 
                 <Button x:Name="btnLock"
-                        x:DataType="classes:OwonSerialCom"
                         Classes="lock" 
                         Grid.Column="2" 
-                        Content="{Binding IsLocked,  Converter={StaticResource isLockedStatusBoolToButtonContentConverter}}" 
+                        Content="{Binding OwonSerialCom.IsLocked,  Converter={StaticResource isLockedStatusBoolToButtonContentConverter}}" 
                         HorizontalAlignment="Stretch" Click="btnLock_Click" />
                 
 
