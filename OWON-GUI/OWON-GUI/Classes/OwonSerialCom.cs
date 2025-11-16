@@ -22,7 +22,7 @@ namespace OWON_GUI.Classes
         public bool IsLocked
         {
             get
-            {
+            { 
                 return _isLocked;
             }
             set
