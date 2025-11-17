@@ -43,6 +43,7 @@ namespace OWON_GUI.Classes
         public static String ToASCIIString(this byte[] s)
         {
             return Encoding.ASCII.GetString(s);
+        }
 
 
         public static int IndexOf(this byte[] s, byte[] pattern)

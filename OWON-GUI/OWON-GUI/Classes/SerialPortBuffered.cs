@@ -401,27 +401,19 @@ namespace OWON_GUI.Classes
         }
 
 
-        public Int32 Read(System.Byte[] buffer, Int32 offset, Int32 count)
+        public byte[] Read(int offset, int count)
         {
-            Int32 ByteLetti;
-            lock (this)
-            {
-                _serialStream.Position = 0;
-                ByteLetti = _serialStream.Read(buffer, offset, count);
-
-                //TODO: controllo se dopo la lettura non viene spostato il cursore quindi la remove cancella i dati sbagliati
-                _serialStream.Remove(ByteLetti);
-                _serialStream.Seek(0, SeekOrigin.End);
-            }
-            return ByteLetti;
-
+            return _serialStream.Remove(offset, count);
         }
 
         public byte[] Read(int count)
         {
-            byte[] temp = new byte[count];
-            Read(temp, 0, temp.Length);
-            return temp;
+            return Read(0, count);
+        }
+
+        public byte[] ReadAll()
+        {
+            return Read(0, (int)_serialStream.Position);
         }
 
 
@@ -488,38 +480,26 @@ namespace OWON_GUI.Classes
 
         public String ReadExisting()
         {
-            lock (this)
-            {
-                int len = (int)_serialStream.Position;
-                byte[] tmp = Read(len);
-                return tmp.ToASCIIString();
-            }
+            return _serialStream.RemoveAll().ToASCIIString();
         }
 
         public String ReadLine()
-        {
-            return ReadTo(endLineChars);
+        { 
+            return ReadTo(endLineCharByte);
         }
 
-        
         public String ReadTo(String value)
         {
-            lock (this)
-            {
-                int indice = IndexOf(value);
-                if (indice == -1)
-                    return null;
+            return ReadTo(value.ToByteArrayASCII());
+        }
+        public String ReadTo(byte[] pattern)
+        {
+            byte[] data= _serialStream.RemoveUntil(pattern);
 
-                //prendi i dati prima dell'indice
-                byte[] data = Read(indice);
-                
-
-                if (data != null)
-                    return data.ToASCIIString();
-                else
-                    return null;
-            }
-
+            if (data.Length>0)
+                return data.ToASCIIString();
+            else
+                return null;
         }
 
 
@@ -529,33 +509,37 @@ namespace OWON_GUI.Classes
         }
         public int IndexOf(byte[] data)
         {
-            byte[] buffer = _serialStream.GetSizedBuffer();
-            return buffer.IndexOf(data);
+            return _serialStream.IndexOf(data);
         }
 
         public void Write(String text)
         {
-            _inter.Write(text);
+            lock(this)
+                _inter.Write(text);
         }
 
         public void Write(System.Char[] buffer, Int32 offset, Int32 count)
         {
-            _inter.Write(buffer, offset, count);
+            lock (this)
+                _inter.Write(buffer, offset, count);
         }
 
         public void Write(System.Byte[] buffer, Int32 offset, Int32 count)
         {
-            _inter.Write(buffer, offset, count);
+            lock (this)
+                _inter.Write(buffer, offset, count);
         }
 
         public void Write(byte b)
         {
-            _inter.Write(new byte[] { b }, 0, 1);
+            lock (this)
+                _inter.Write(new byte[] { b }, 0, 1);
         }
 
         public void WriteLine(String text)
         {
-            _inter.WriteLine(text);
+            lock (this)
+                _inter.WriteLine(text);
         }
 
         public void Dispose()
@@ -591,6 +575,12 @@ namespace OWON_GUI.Classes
         }
 
 
+        public SerialPort getInternalSerialPort()
+        {
+            return _inter;
+        }
+
+
         #endregion
 
         #region Events
@@ -610,6 +600,8 @@ namespace OWON_GUI.Classes
             _inter.Disposed += Disposed;
         }
 
+        
+
 
         #endregion
 
@@ -618,7 +610,7 @@ namespace OWON_GUI.Classes
         {
             if (BytesToRead <= 0)
                 return;
-
+      
             byte[] buff = _inter.Read(BytesToRead);
 
             lock (this)

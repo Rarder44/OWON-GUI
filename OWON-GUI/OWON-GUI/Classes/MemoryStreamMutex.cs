@@ -1,5 +1,7 @@
-﻿using System;
+﻿using HarfBuzzSharp;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
@@ -425,21 +427,6 @@ namespace OWON_GUI.Classes
             }
         }
 
-        public object GetLifetimeService()
-        {
-            lock (_locker)
-            {
-                return inter.GetLifetimeService();
-            }
-        }
-
-        public object InitializeLifetimeService()
-        {
-            lock (_locker)
-            {
-                return inter.InitializeLifetimeService();
-            }
-        }
       
 
         public String ToString()
@@ -474,15 +461,70 @@ namespace OWON_GUI.Classes
             }
         }
 
-        public void Remove(int numberOfBytesToRemove)
+
+        public byte[] Remove(int from, int numBytes)
         {
+            //prendpo il buffer di memoria
+            //sposto tutti i dati DOPO quelli da rimuovere a 0
+            //imposto la nuova lunghezza del buffer pari ai dati rimanenti
+
+            if (numBytes <= 0 || from > inter.Length || from+numBytes>inter.Length)
+                return new byte[0];
+
+            byte[] removed = new byte[numBytes];
             lock (_locker)
             {
                 byte[] buf = inter.GetBuffer();
-                Buffer.BlockCopy(buf, numberOfBytesToRemove, buf, 0, (int)inter.Length - numberOfBytesToRemove);
-                inter.SetLength(inter.Length - numberOfBytesToRemove);
+
+                //mi salvo i che poi rimuoverò
+                System.Buffer.BlockCopy(buf, from, removed, 0, numBytes);
+
+                int byteAfterSectionToRemove = (int)inter.Length - (from + numBytes);
+                // sposto i dati successivi alla sezione da cancellare sopra la sezione da cancellare
+                System.Buffer.BlockCopy(buf, from + numBytes, buf, from, byteAfterSectionToRemove);
+
+                //cambio la lunghezza del buffer
+                int remaining = (int)inter.Length - numBytes;
+                inter.SetLength(remaining);
+
+                //sposto la posizione alla fine
+                inter.Seek(0, SeekOrigin.End);
+
             }
 
+            return removed;
+        }
+
+
+        public byte[] RemoveAll()
+        {
+            lock (_locker)
+                return Remove(0, (int)inter.Position);
+        }
+
+
+        public byte[] RemoveUntil(byte[] searchPattern)
+        {
+            lock (this)
+            {
+                int indice = IndexOf(searchPattern);
+                if (indice == -1)
+                    return new byte[0];
+
+                //prendi i dati prima dell'indice
+                return  Remove(0, indice+1); 
+            }
+        }
+
+
+
+        public int IndexOf(byte[] data)
+        {
+            lock (this)
+            {
+                byte[] buffer = this.GetSizedBuffer();
+                return buffer.IndexOf(data);
+            }
         }
 
         /// <summary>

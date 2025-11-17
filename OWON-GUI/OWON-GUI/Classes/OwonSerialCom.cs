@@ -11,8 +11,93 @@ using System.Diagnostics;
 
 namespace OWON_GUI.Classes
 {
+    public enum SpeedReadType
+    {
+        Current,
+        Voltage,
+        Power,
+        Current_Voltage,
+        Current_Voltage_Power
+    }
+
+    public struct SpeedDataRawEntry
+    {
+        public long tick;
+        public string row;
+
+        public SpeedDataRawEntry(long tick, string row)
+        {
+            this.tick = tick;
+            this.row = row; 
+        }
+
+        public override string ToString()
+        {
+            return tick + " - " + row;
+        }
+    }
+
+    public class SpeedDataEntry
+    {
+        long Millis { get; set; }
+        long Micros{ get; set; }
+        double Current { get; set; }
+        double Voltage { get; set; }
+        double Power { get; set; }
+
+        public SpeedDataEntry(SpeedDataRawEntry raw, SpeedReadType type)
+        {
+            Micros = (long)(raw.tick * (1_000_000.0 / Stopwatch.Frequency));
+            Millis = Micros / 1000;
+
+            double v,v2,v3;
+            String[] splitted;
+            switch (type)
+            {
+                case SpeedReadType.Current:
+                    v = double.Parse(raw.row);
+                    Current = v;
+                    break;
+                case SpeedReadType.Voltage:
+                    v = double.Parse(raw.row);
+                    Voltage = v;
+                    break;
+                case SpeedReadType.Power:
+                    v = double.Parse(raw.row);
+                    Power = v;
+                    break;
+
+                case SpeedReadType.Current_Voltage:
+                    splitted = raw.row.Split(',');
+                    v = double.Parse(splitted[0]);
+                    v2 = double.Parse(splitted[1]);
+                    Voltage = v;
+                    Current = v2;
+                    break;
+                case SpeedReadType.Current_Voltage_Power:
+                    splitted = raw.row.Split(',');
+                    v = double.Parse(splitted[0]);
+                    v2 = double.Parse(splitted[1]);
+                    v3 = double.Parse(splitted[2]);
+                    Voltage = v;
+                    Current = v2;
+                    Power = v3;
+                    break;
+
+            }
+        }
+
+        public override string ToString()
+        {
+            return Millis + " - " + Current + " | " + Voltage + " | " + Power;
+        }
+
+    }
+
     public class OwonSerialCom :INotifyPropertyChanged
     {
+        const int DEVICE_BUFFER_SIZE = 200;  //find by try and error
+
 
         #region Exceptions
         public class ComunicationNotStartedException: Exception
@@ -181,10 +266,10 @@ namespace OWON_GUI.Classes
 
         private CancellableTask ContinuosLockTask = null;
         private Task NormalFetchDataTask = null;
-        private Task FastFetchDataTask = null;
+        private CancellableTask FastFetchDataTask = null;
 
 
-        private SerialPortBuffered com= null;
+        public SerialPortBuffered com= null;
 
 
 
@@ -291,11 +376,123 @@ namespace OWON_GUI.Classes
 
 
 
-        public void RawWrite(String s)
+        
+
+        
+       
+
+        private string getCommand(SpeedReadType type)
         {
-            com.Write(s);
+            if (type == SpeedReadType.Current)
+                return "MEAS:CURR?";
+            else if (type == SpeedReadType.Voltage)
+                return "MEAS:VOLT?";
+            else if (type == SpeedReadType.Power)
+                return "MEAS:POW?";
+            else if (type == SpeedReadType.Current_Voltage)
+                return "MEAS:ALL?";
+            else if (type == SpeedReadType.Current_Voltage_Power)
+                return "MEAS:ALL:INFO?";
+
+     
+            return "MEAS:CURR?";
         }
 
+
+
+
+
+        private List<SpeedDataRawEntry> rawSpeedData = new List<SpeedDataRawEntry>();
+        public int NumRawSpeedData
+        {
+            get
+            {
+                return rawSpeedData.Count;
+            }
+        }
+
+        public void startSpeedRead(SpeedReadType type)
+        {
+            //interrompo tutto!!!
+            
+
+            //svuoto il buffer di lettura da precendenti scritture
+            com.ReadAll();
+
+
+            FastFetchDataTask = new CancellableTask(async (ct) =>
+            {
+                //calcolo quanto è lungo il comando in byte e in base al buffer del dispositivo so quanti comandi "ripetuti" massimo posso inviare
+                String command = getCommand(type);
+                int maxNumberOfSend = OwonSerialCom.DEVICE_BUFFER_SIZE / (command.Length + 1);        //+1 per lo \n
+                do
+                {
+
+                    //invio N comandi 
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 0; i < maxNumberOfSend; i++)
+                    {
+                        sb.Append(command + "\n");
+                    }
+                    com.Write(sb.ToString());
+
+                    //mentre aspetto la risposta ( circa 50ms ) aggiorno la GUI per non perdere tempo
+                    OnPropertyChanged(nameof(NumRawSpeedData));
+
+
+                    //tengo traccia delle righe lette, leggo linea per linea
+                    int CountRows = 0;
+                    do
+                    {
+                        String row;
+                        while ((row = com.ReadLine()) == null && !ct.IsCancellationRequested);      //fin quando non leggo una linea, aspetto
+
+                        if (row == null)                        //cancell request arrivato
+                            break;
+
+
+                        //salvo la riga ed il timestamp
+                        rawSpeedData.Add(new SpeedDataRawEntry(Stopwatch.GetTimestamp(), row));
+                        CountRows++;
+
+                    } while (!ct.IsCancellationRequested && CountRows < maxNumberOfSend);       //continuo fino alla NEsima riga 
+
+                }
+                while (!ct.IsCancellationRequested);
+
+
+
+
+            });
+            
+            FastFetchDataTask.InnerTask.Start();
+        }
+
+        public async Task<List<SpeedDataRawEntry>> stopSpeedRead()
+        {
+            if (FastFetchDataTask != null)
+            {
+
+                FastFetchDataTask.Cancel();
+                await FastFetchDataTask.InnerTask;
+                FastFetchDataTask = null;
+            }
+
+            return rawSpeedData;
+
+        }
+
+        
+
+
+
+        public void RawWrite(String s)
+        {
+            if (s == null)
+                return;
+            com.Write(s);
+        }
+        
 
     }
 }
