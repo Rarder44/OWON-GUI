@@ -236,8 +236,8 @@
         <!--Connection-->
         <Border Grid.Row="2" Grid.Column="0" Margin="10"  Padding="10">
             <StackPanel>
-                <ComboBox x:Name="comboBoxPort" Width="150" Height="30" Margin="0,0,0,10"/>
-                <Button Content="Connect"  x:Name="btnConnect" Width="150" />
+                <ComboBox x:Name="comboBoxPorts" Width="150" Height="30" Margin="0,0,0,10"/>
+                <Button Content="Connect"  x:Name="btnConnect" Width="150" Click="btnConnect_Click" />
             </StackPanel>
         </Border>
 
@@ -255,11 +255,13 @@
 
                 <StackPanel Orientation="Horizontal" >
                     <Label Content="Type" VerticalAlignment="Center"></Label>
-                    <TextBox  Width="100" x:Name="txtType" IsReadOnly="True" Margin="0 0 15 0"></TextBox>
+                    <TextBox  Width="100" x:Name="txtType" IsReadOnly="True" Margin="0 0 15 0" Text="{Binding OwonSerialCom.DeviceType}"></TextBox>
+
                     <Label Content="Firmware" VerticalAlignment="Center"></Label>
-                    <TextBox  Width="100" x:Name="txtFirmware" IsReadOnly="True" Margin="0 0 15 0"></TextBox>
+                    <TextBox  Width="100" x:Name="txtFirmware" IsReadOnly="True" Margin="0 0 15 0" Text="{Binding OwonSerialCom.Firmware}"></TextBox>
+
                     <Label Content="SN" VerticalAlignment="Center"></Label>
-                    <TextBox  Width="100" x:Name="txtSN" IsReadOnly="True" Margin="0 0 15 0"></TextBox>
+                    <TextBox  Width="100" x:Name="txtSN" IsReadOnly="True" Margin="0 0 15 0" Text="{Binding OwonSerialCom.SerialNumber}"></TextBox>
 
 
 
@@ -291,5 +293,14 @@
         </Border>
 
         
+
+        <!-- DEMO -->
+        
+        <Button  Grid.Row="1" Grid.Column="0" Content="t1"   Width="50" x:Name="t1" Click="t1_Click" />
+        <Button Grid.Row="1" Grid.Column="1"  Content="t2"   Width="50" x:Name="t2" Click="t2_Click"/>
+        <Button Grid.Row="1" Grid.Column="2"  Content="t3"   Width="50" x:Name="t3" Click="t3_Click" />
+        <Button Grid.Row="1" Grid.Column="3"  Content="t4"   Width="50" x:Name="t4" Click="t4_Click" />
+        <TextBox x:Name="demoText" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Height="150" />
+
     </Grid>
 </Window>
