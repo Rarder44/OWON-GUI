@@ -9,7 +9,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using static OWON_GUI.Classes.OwonSerialCom;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace OWON_GUI
 {
@@ -24,13 +23,15 @@ namespace OWON_GUI
         public MainWindow()
         {
             InitializeComponent();
-            this.DataContext = this;
+
 
             comboBoxPorts.ItemsSource = SerialPort.GetPortNames().ToList();
 
-            _owonSerialCom.init("COM3");
+            if (!Design.IsDesignMode)
+                _owonSerialCom.init("COM3");
 
-            //_owonSerialCom.com.RawDataReceived += Com_RawDataReceived;
+
+            this.DataContext = this;
 
         }
 
@@ -39,9 +40,9 @@ namespace OWON_GUI
             Dispatcher.UIThread.Post(() => demoText.Text += rawData.ToASCIIString());
         }
 
-      
 
-     
+
+
 
         private void btnLock_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
@@ -54,14 +55,14 @@ namespace OWON_GUI
             _owonSerialCom.IsPowered = !_owonSerialCom.IsPowered;
         }
 
-       
+
         private void btnConnect_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
 
-           
+
         }
 
-        private async  void t1_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        private async void t1_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             //_owonSerialCom.RawWrite("*IDN?\n");
 
@@ -100,25 +101,32 @@ namespace OWON_GUI
 
 
         }
-        SpeedReadType type = SpeedReadType.Current_Voltage_Power;
+        FastReadType type = FastReadType.Current_Voltage_Power;
         private void t2_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            _owonSerialCom.startSpeedRead(type);
+            _owonSerialCom.StartFastReadData(type);
         }
 
         private async void t3_ClickAsync(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            List<SpeedDataRawEntry> res = await _owonSerialCom.stopSpeedRead();
+            List<FastDataRawEntry> res = await _owonSerialCom.StopFastReadData();
             foreach (var item in res)
             {
-                demoText.Text += new SpeedDataEntry(item, type)+"\n";
+                demoText.Text += new FastDataEntry(item, type) + "\n";
             }
 
         }
 
-        private void t4_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        private async void t4_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            _owonSerialCom.RawWrite(demoText1.Text);
+            //_owonSerialCom.RawWrite(demoText1.Text);
+
+            _owonSerialCom.acquireRTValues();
+
+        }
+
+        private void Led_ActualThemeVariantChanged(object? sender, EventArgs e)
+        {
         }
     }
 }

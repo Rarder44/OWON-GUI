@@ -487,6 +487,83 @@ namespace OWON_GUI.Classes
         { 
             return ReadTo(endLineCharByte);
         }
+        async public Task<String> ReadLineAsync(CancellationToken? cancellationToken=null)
+        {
+            /*Task<String> task = Task<String>.Run(() => {
+                String line = null;
+                while ((line = ReadTo(endLineCharByte)) == null) ;
+
+                return line;
+            });
+            return await task;*/
+
+           
+            SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
+            TaskCompletionSource<String> tcsNuovaLinea = new TaskCompletionSource<String>(TaskCreationOptions.RunContinuationsAsynchronously);
+            String retVal=null;
+
+            //imposto il token di cancellazione se viene passato
+            //var registration = 
+            cancellationToken?.Register(() =>
+            {
+                tcsNuovaLinea.TrySetCanceled();
+            });
+
+            // Abbonati all'evento
+            SerialDataReceivedEventHandler handler = null!;
+            handler = async (sender, e) =>
+            {
+                await semaphore.WaitAsync();
+                //mi è arrivata una nuova linea ma non è che non devo leggere xke ne ho già letta una?
+                //se è null, vuol dire che sono tranquillo che nessuno l'ha assegnata e sono l'unico a poterla assengnare
+                //se diverso da null, vuol dire che ho gia in qualche modo trovato la riga, quindi non devo pià leggere nulla
+                if(retVal== null)
+                {
+                    // Quando l'evento viene lanciato, completa il task
+                    String s = ReadTo(endLineCharByte);
+                    tcsNuovaLinea?.TrySetResult(s);
+                    // Si può anche disabbonare subito
+                    LineReceived -= handler;
+                }
+
+                semaphore.Release();
+
+            };
+           
+
+            //tra il primo e l'ultimo controllo potrebbe esserci stato l'evento, quindi
+            //controllo se è arrivata una linea
+            //ma lo faccio in un semaforo xke non so se nel frattempo potrebbe arrivare un'evento LineReceived
+            await semaphore.WaitAsync();
+
+            //aggiungo l'handler dopo la wait in modo che se, da questo momento in poi cè un evento
+            //comunque non viene analizzanto visto che non puo entrare nel semaforo
+            LineReceived += handler;        
+
+            retVal = ReadTo(endLineCharByte);
+            if (retVal != null)
+            {
+                LineReceived -= handler;
+            }
+            semaphore.Release();
+
+            if(retVal==null)
+            {
+                //se arrivo qua, vuol dire che
+                // devo attendere il completamento del task, che avverrà quando l'evento viene invocato
+                try
+                {
+                    retVal = await tcsNuovaLinea.Task;
+                }
+                catch (Exception e)      //se viene cancellato dal cancellation token
+                {
+                    retVal=  null;
+                }
+            }
+            return retVal;
+            
+
+        }
 
         public String ReadTo(String value)
         {

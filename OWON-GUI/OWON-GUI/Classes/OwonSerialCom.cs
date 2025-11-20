@@ -8,95 +8,15 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using OWON_GUI.Converter;
 
 namespace OWON_GUI.Classes
 {
-    public enum SpeedReadType
-    {
-        Current,
-        Voltage,
-        Power,
-        Current_Voltage,
-        Current_Voltage_Power
-    }
-
-    public struct SpeedDataRawEntry
-    {
-        public long tick;
-        public string row;
-
-        public SpeedDataRawEntry(long tick, string row)
-        {
-            this.tick = tick;
-            this.row = row; 
-        }
-
-        public override string ToString()
-        {
-            return tick + " - " + row;
-        }
-    }
-
-    public class SpeedDataEntry
-    {
-        long Millis { get; set; }
-        long Micros{ get; set; }
-        double Current { get; set; }
-        double Voltage { get; set; }
-        double Power { get; set; }
-
-        public SpeedDataEntry(SpeedDataRawEntry raw, SpeedReadType type)
-        {
-            Micros = (long)(raw.tick * (1_000_000.0 / Stopwatch.Frequency));
-            Millis = Micros / 1000;
-
-            double v,v2,v3;
-            String[] splitted;
-            switch (type)
-            {
-                case SpeedReadType.Current:
-                    v = double.Parse(raw.row);
-                    Current = v;
-                    break;
-                case SpeedReadType.Voltage:
-                    v = double.Parse(raw.row);
-                    Voltage = v;
-                    break;
-                case SpeedReadType.Power:
-                    v = double.Parse(raw.row);
-                    Power = v;
-                    break;
-
-                case SpeedReadType.Current_Voltage:
-                    splitted = raw.row.Split(',');
-                    v = double.Parse(splitted[0]);
-                    v2 = double.Parse(splitted[1]);
-                    Voltage = v;
-                    Current = v2;
-                    break;
-                case SpeedReadType.Current_Voltage_Power:
-                    splitted = raw.row.Split(',');
-                    v = double.Parse(splitted[0]);
-                    v2 = double.Parse(splitted[1]);
-                    v3 = double.Parse(splitted[2]);
-                    Voltage = v;
-                    Current = v2;
-                    Power = v3;
-                    break;
-
-            }
-        }
-
-        public override string ToString()
-        {
-            return Millis + " - " + Current + " | " + Voltage + " | " + Power;
-        }
-
-    }
-
+   
     public class OwonSerialCom :INotifyPropertyChanged
     {
-        const int DEVICE_BUFFER_SIZE = 200;  //find by try and error
+        public const int DEVICE_BUFFER_SIZE = 200;  //find by try and error
+
 
 
         #region Exceptions
@@ -174,13 +94,9 @@ namespace OWON_GUI.Classes
                     return _firmware;
 
 
-                if (com == null)
+                if (comManager == null)
                     return null;
-                    //throw new ComunicationNotStartedException();
 
-                if (_taskActive)
-                    return null;
-                //throw new TaskActiveException();
 
                 acquireDeviceInfo();
 
@@ -206,10 +122,7 @@ namespace OWON_GUI.Classes
                     return _type;
 
 
-                if (com == null)
-                    return null;
-
-                if (_taskActive)
+                if (comManager == null)
                     return null;
 
                 acquireDeviceInfo();
@@ -227,8 +140,6 @@ namespace OWON_GUI.Classes
             }
         }
 
-
-
         private String _sn = null;
         public String SerialNumber
         {
@@ -238,10 +149,7 @@ namespace OWON_GUI.Classes
                     return _sn;
 
 
-                if (com == null)
-                    return null;
-
-                if (_taskActive)
+                if (comManager == null)
                     return null;
 
                 acquireDeviceInfo();
@@ -261,63 +169,158 @@ namespace OWON_GUI.Classes
 
 
 
+        DateTime invalidationDate= DateTime.MinValue;
+
+        private float _voltageRT = 0;
+        public float VoltageRT
+        {
+            get
+            {
+                if (DateTime.Now > invalidationDate)
+                {
+                    //prendi i dati 
+                    acquireRTValues();
+                }
+                return _voltageRT;
+            }
+        }
+        private float _currentRT = 0;
+        public float CurrentRT
+        {
+            get
+            {
+                if (DateTime.Now > invalidationDate)
+                {
+                    //prendi i dati 
+                    acquireRTValues();
+                }
+                return _currentRT;
+            }
+        }
+
+
+        private float _powerRT = 0;
+        public float PowerRT
+        {
+            get
+            {
+                if (DateTime.Now > invalidationDate)
+                {
+                    //prendi i dati 
+                    acquireRTValues();
+                }
+                return _powerRT;
+            }
+        }
+
+        private bool _overVoltage;
+        public bool OverVoltage
+        {
+            get
+            {
+                if (DateTime.Now > invalidationDate)
+                {
+                    //prendi i dati 
+                    acquireRTValues();
+                }
+                return _overVoltage;
+            }
+        }
+
+        private bool _overCurrent;
+        public bool OverCurrent
+        {
+            get
+            {
+                if (DateTime.Now > invalidationDate)
+                {
+                    //prendi i dati 
+                    acquireRTValues();
+                }
+                return _overCurrent;
+            }
+        }
+
+        private bool _overTemperature;
+        public bool OverTemperature
+        {
+            get
+            {
+                if (DateTime.Now > invalidationDate)
+                {
+                    //prendi i dati 
+                    acquireRTValues();
+                }
+                return _overTemperature;
+            }
+        }
+
+
+        private OperatingModeEnum _operatingMode;
+        public OperatingModeEnum OperatingMode
+        {
+            get
+            {
+                if (DateTime.Now > invalidationDate)
+                {
+                    //prendi i dati 
+                    acquireRTValues();
+                }
+                return _operatingMode;
+            }
+        }
+
+
+
+
+
+
 
         #endregion
 
+
+
+        //------------------------------------------------------------------------
+        //------------------------------------------------------------------------
+        //------------------------------------------------------------------------
+
+
+
         private CancellableTask ContinuosLockTask = null;
-        private Task NormalFetchDataTask = null;
-        private CancellableTask FastFetchDataTask = null;
+        private CancellableTask NormalFetchDataTask = null;
 
+                
 
-        public SerialPortBuffered com= null;
-
-
-
-
-        private bool _taskActive = false;
+        SerialComunicationManager comManager = null;
+         
 
         public void init(String COM)
         {
-            com = new SerialPortBuffered(COM,115200,Parity.None,8,StopBits.One);
-            com.Open();
+            comManager = new SerialComunicationManager(COM,115200,Parity.None,8,StopBits.One);
 
             acquireDeviceInfo();
             IsLocked = false;
         }
-
-
-
-        private void acquireDeviceInfo()
+        async private void acquireDeviceInfo()
         {
-            com.Write("*IDN?\n");
-            do
-            {
-                String s = com.ReadLine();
-                if (s!=null)
-                {
-                    String[] tmp= s.Split(",");
-                    if (tmp.Length != 4)
-                        throw new OWONProtocolException("IDN ( info ) string not correctly formatted");
 
-                    DeviceType = tmp[1];
-                    SerialNumber = tmp[2];
+            String s =  await comManager.makeRequest("*IDN?\n");
 
-                    Firmware = tmp[3];
-                    break;
-                }
-            }
-            while (true);
+            String[] tmp = s.Split(",");
+            if (tmp.Length != 4)
+                throw new OWONProtocolException("IDN ( info ) string not correctly formatted");
+
+            DeviceType = tmp[1];
+            SerialNumber = tmp[2];
+
+            Firmware = tmp[3];
 
         }
-
-
-        
         private async Task setDeviceLockStatus(bool toLock)
         {
             if (toLock)
             {
-                com.Write("SYST:REM\n"); //SYSTem: REMote
-
+                
                 if (ContinuosLockTask != null && !ContinuosLockTask.InnerTask.IsCompleted)
                 {
 
@@ -331,7 +334,7 @@ namespace OWON_GUI.Classes
                         do
                         {
                             Debug.WriteLine("bloccato");
-                            com.Write("SYST:REM\n");
+                            await comManager.makeRequestWithoutResponse("SYST:REM\n"); //SYSTem: REMote
                             try {
                                 await Task.Delay(3000, ct);
                             }
@@ -355,144 +358,122 @@ namespace OWON_GUI.Classes
                     ContinuosLockTask.Cancel();
                     await ContinuosLockTask.InnerTask;
                 }
-                
 
-                com.Write("SYST:LOC\n");// SYSTem: LOCal
+                await comManager.makeRequestWithoutResponse("SYST:LOC\n"); //SYSTem: REMote
             }
         }
-
-
-        private void setDevicePowered(bool toPower)
+        private async void setDevicePowered(bool toPower)
         {
+            String command;
             if(toPower)
             {
-                com.Write("OUTP 1\n"); 
+                command = "OUTP 1\n";
             }
             else
             {
-                com.Write("OUTP 0\n");
+                command = "OUTP 0\n";
+            }
+
+            await comManager.makeRequestWithoutResponse(command);
+        }
+
+
+
+
+        //TODO: mettere private
+        async public Task acquireRTValues()
+        {
+            if (DateTime.Now > invalidationDate)
+            {
+                String str = await comManager.makeRequest("MEAS:ALL:INFO?\n");
+                String[] parts = str.Split(',');
+                _voltageRT = float.Parse(parts[0], System.Globalization.CultureInfo.InvariantCulture);
+                _currentRT = float.Parse(parts[1], System.Globalization.CultureInfo.InvariantCulture);
+                _powerRT = float.Parse(parts[2], System.Globalization.CultureInfo.InvariantCulture);
+                //1 -> current
+                //2 -> watt
+                //OFF,OFF,OFF,0
+
+                _overVoltage = parts[3] == "ON" || parts[3] == "1";
+                _overCurrent = parts[4] == "ON" || parts[4] == "1";
+                _overTemperature = parts[5] == "ON" || parts[5] == "1";
+
+
+                _operatingMode = (OperatingModeEnum)int.Parse(parts[6]);
+
+                if (_operatingMode == OperatingModeEnum.StandBy || _operatingMode == OperatingModeEnum.Failure)
+                    _isPowered = false;
+                else
+                    _isPowered = true;
+
+                invalidationDate = DateTime.Now + TimeSpan.FromSeconds(1);
+
+                OnPropertyChanged(nameof(VoltageRT));
+                OnPropertyChanged(nameof(CurrentRT));
+                OnPropertyChanged(nameof(PowerRT));
+                OnPropertyChanged(nameof(OverVoltage));
+                OnPropertyChanged(nameof(OverCurrent));
+                OnPropertyChanged(nameof(OverTemperature));
+                OnPropertyChanged(nameof(OperatingMode));
+                OnPropertyChanged(nameof(IsPowered));
             }
         }
 
-
-
-        
-
-        
-       
-
-        private string getCommand(SpeedReadType type)
+        async public Task acquireSetupValues()
         {
-            if (type == SpeedReadType.Current)
-                return "MEAS:CURR?";
-            else if (type == SpeedReadType.Voltage)
-                return "MEAS:VOLT?";
-            else if (type == SpeedReadType.Power)
-                return "MEAS:POW?";
-            else if (type == SpeedReadType.Current_Voltage)
-                return "MEAS:ALL?";
-            else if (type == SpeedReadType.Current_Voltage_Power)
-                return "MEAS:ALL:INFO?";
+            //CURRent?
+            //CURRent:LIMit?
 
-     
-            return "MEAS:CURR?";
+            //VOLTage?
+            //VOLTage:LIMit?
+
+        }
+
+
+        async public Task acquireOutputStatus()
+        {
+            //OUTPut?
+        }
+
+
+        private async void setCurrent(float current)
+        {
+           
+        }
+        private async void setCurrentLimit(float currentLimit)
+        {
+
+        }
+
+        private async void setVoltage(float voltage)
+        {
+
+        }
+        private async void setVoltageLimit(float voltageLimit)
+        {
+
         }
 
 
 
 
-
-        private List<SpeedDataRawEntry> rawSpeedData = new List<SpeedDataRawEntry>();
-        public int NumRawSpeedData
+        async public void StartFastReadData(FastReadType type)
         {
-            get
-            {
-                return rawSpeedData.Count;
-            }
-        }
+            OwnFastReadingService frs = OwnFastReadingService.Instance;
+            if (frs.IsRunning )
+                throw new InvalidOperationException("Can't start FastReadData because the service is already running.");
 
-        public void startSpeedRead(SpeedReadType type)
-        {
-            //interrompo tutto!!!
-            
-
-            //svuoto il buffer di lettura da precendenti scritture
-            com.ReadAll();
-
-
-            FastFetchDataTask = new CancellableTask(async (ct) =>
-            {
-                //calcolo quanto è lungo il comando in byte e in base al buffer del dispositivo so quanti comandi "ripetuti" massimo posso inviare
-                String command = getCommand(type);
-                int maxNumberOfSend = OwonSerialCom.DEVICE_BUFFER_SIZE / (command.Length + 1);        //+1 per lo \n
-                do
-                {
-
-                    //invio N comandi 
-                    StringBuilder sb = new StringBuilder();
-                    for (int i = 0; i < maxNumberOfSend; i++)
-                    {
-                        sb.Append(command + "\n");
-                    }
-                    com.Write(sb.ToString());
-
-                    //mentre aspetto la risposta ( circa 50ms ) aggiorno la GUI per non perdere tempo
-                    OnPropertyChanged(nameof(NumRawSpeedData));
-
-
-                    //tengo traccia delle righe lette, leggo linea per linea
-                    int CountRows = 0;
-                    do
-                    {
-                        String row;
-                        while ((row = com.ReadLine()) == null && !ct.IsCancellationRequested);      //fin quando non leggo una linea, aspetto
-
-                        if (row == null)                        //cancell request arrivato
-                            break;
-
-
-                        //salvo la riga ed il timestamp
-                        rawSpeedData.Add(new SpeedDataRawEntry(Stopwatch.GetTimestamp(), row));
-                        CountRows++;
-
-                    } while (!ct.IsCancellationRequested && CountRows < maxNumberOfSend);       //continuo fino alla NEsima riga 
-
-                }
-                while (!ct.IsCancellationRequested);
-
-
-
-
-            });
-            
-            FastFetchDataTask.InnerTask.Start();
-        }
-
-        public async Task<List<SpeedDataRawEntry>> stopSpeedRead()
-        {
-            if (FastFetchDataTask != null)
-            {
-
-                FastFetchDataTask.Cancel();
-                await FastFetchDataTask.InnerTask;
-                FastFetchDataTask = null;
-            }
-
-            return rawSpeedData;
+            frs.setCom(comManager);
+            await frs.Start(type);
 
         }
 
-        
-
-
-
-        public void RawWrite(String s)
+        async public Task<List<FastDataRawEntry>> StopFastReadData()
         {
-            if (s == null)
-                return;
-            com.Write(s);
+            OwnFastReadingService frs = OwnFastReadingService.Instance;
+            return await frs.Stop();
         }
-        
+
 
     }
 }

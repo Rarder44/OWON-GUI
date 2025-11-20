@@ -107,6 +107,7 @@
     </Window.Styles>
     <Window.Resources>
         <converters:isLockedStatusBoolToButtonContentConverter x:Key="isLockedStatusBoolToButtonContentConverter"/>
+        <converters:OperatingModeEnumToStringConverter x:Key="OperatingModeEnumToStringConverter"/>
     </Window.Resources>
     
     <Grid>
@@ -136,7 +137,7 @@
                         <ColumnDefinition Width="50"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBox x:Name="entryV_RT" Grid.Column="1" Classes="ReadOnly FloatVal"/>
+                    <TextBox x:Name="entryV_RT" Text="{Binding OwonSerialCom.VoltageRT}" Grid.Column="1" Classes="ReadOnly FloatVal"/>
                     <Label Content="V" Grid.Column="2"  />
                 </Grid>
 
@@ -146,11 +147,11 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="25"/>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="30"/>
 
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
@@ -159,10 +160,24 @@
                     <Button Content="->" Padding="0"  Grid.Row="0" Grid.Column="0"></Button>
                     <TextBox x:Name="entryV"  Classes="FloatVal" Grid.Row="0" Grid.Column="1"/>
                     <Label VerticalAlignment="Center" Content="V"  Grid.Row="0" Grid.Column="2"/>
+                    <controls:Led 
+                        Diameter="25" 
+                        OnColor="#FF0000" 
+                        OffColor="#770000"
+                        Text="OV" 
+                        TextColor="#000000"
+                        IsOn="{Binding OwonSerialCom.OverVoltage}" 
+    
+                        Grid.Row="0" Grid.Column="3"
+                        />
+	
+                    
+
+
 
                     <Button Content="->" Padding="0"  Grid.Row="1" Grid.Column="0"></Button>
                     <TextBox x:Name="entryVStop"  Classes="FloatVal" Grid.Row="1" Grid.Column="1"/>
-                    <Label VerticalAlignment="Center" Content="V Stop"  Grid.Row="1" Grid.Column="2"/>
+                    <Label VerticalAlignment="Center" Content="V Stop"  Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2"/>
                 </Grid>
             </StackPanel>
         </Border>
@@ -178,7 +193,7 @@
                         <ColumnDefinition Width="50"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBox x:Name="entryC_RT" Grid.Column="1" Classes="ReadOnly FloatVal"/>
+                    <TextBox x:Name="entryC_RT" Grid.Column="1" Classes="ReadOnly FloatVal" Text="{Binding OwonSerialCom.CurrentRT}" />
                     <Label Content="A" Grid.Column="2"/>
                 </Grid>
 
@@ -187,11 +202,11 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="25"/>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="30"/>
 
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
@@ -200,10 +215,22 @@
                     <Button Content="->" Padding="0"  Grid.Row="0" Grid.Column="0"></Button>
                     <TextBox x:Name="entryC" Classes="FloatVal"  Grid.Row="0" Grid.Column="1"/>
                     <Label VerticalAlignment="Center" Content="A"  Grid.Row="0" Grid.Column="2"/>
+                     <controls:Led 
+                        Diameter="25" 
+                        OnColor="#FF0000" 
+                        OffColor="#770000"
+                        Text="OC" 
+                        TextColor="#000000"
+                        IsOn="{Binding OwonSerialCom.OverCurrent}" 
+    
+                        Grid.Row="0" Grid.Column="3"
+                        />
+
+
 
                     <Button Content="->" Padding="0"  Grid.Row="1" Grid.Column="0"></Button>
                     <TextBox x:Name="entryCStop" Classes="FloatVal"  Grid.Row="1" Grid.Column="1"/>
-                    <Label VerticalAlignment="Center" Content="A Stop"  Grid.Row="1" Grid.Column="2"/>
+                    <Label VerticalAlignment="Center" Content="A Stop"  Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2"/>
                 </Grid>
             </StackPanel>
         </Border>
@@ -219,7 +246,7 @@
                         <ColumnDefinition Width="45"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBox x:Name="entryP_RT" Grid.Column="1" Classes="ReadOnly FloatVal"/>
+                    <TextBox x:Name="entryP_RT" Grid.Column="1" Classes="ReadOnly FloatVal" Text="{Binding OwonSerialCom.PowerRT}"/>
                     <Label Content="W" Grid.Column="2" />
                 </Grid>
 
@@ -229,9 +256,29 @@
             </StackPanel>
         </Border>
 
-        <!--Controls -->
-        <Button Content="On/Off" Grid.Row="0" Grid.Column="3" x:Name="btnOnOff"  Tag="{Binding OwonSerialCom.IsPowered}" Click="btnOnOff_Click" />
+       
 
+        <!--Controls -->
+         <StackPanel Grid.Row="0" Grid.Column="3">
+            <Button Content="On/Off"  x:Name="btnOnOff" Margin="0 40 0 10" Tag="{Binding OwonSerialCom.IsPowered}" Click="btnOnOff_Click" />
+             <controls:Led 
+                        Diameter="25" 
+                        OnColor="#FF0000" 
+                        OffColor="#770000"
+                        Text="OT" 
+                        TextColor="#000000"
+                        IsOn="{Binding OwonSerialCom.OverTemperature}" 
+                        HorizontalAlignment="Left"
+
+                        />
+             <StackPanel Orientation="Horizontal" >
+                  <Label Content="Mode:"  />
+				  <Label Content="{Binding OwonSerialCom.OperatingMode,  Converter={StaticResource OperatingModeEnumToStringConverter}}" 
+                        />
+             </StackPanel>
+              
+
+         </StackPanel>
 
         <!--Connection-->
         <Border Grid.Row="2" Grid.Column="0" Margin="10"  Padding="10">
@@ -263,7 +310,7 @@
                     <Label Content="SN" VerticalAlignment="Center"></Label>
                     <TextBox  Width="100" x:Name="txtSN" IsReadOnly="True" Margin="0 0 15 0" Text="{Binding OwonSerialCom.SerialNumber}"></TextBox>
 
-
+                    
 
                 </StackPanel>
                 
@@ -298,7 +345,7 @@
         
         <Button  Grid.Row="1" Grid.Column="0" Content="t1"   Width="50" x:Name="t1" Click="t1_Click" />
         <Button Grid.Row="1" Grid.Column="1"  Content="t2"   Width="50" x:Name="t2" Click="t2_Click"/>
-        <Button Grid.Row="1" Grid.Column="2"  Content="{Binding OwonSerialCom.NumRawSpeedData}"   Width="50" x:Name="t3" Click="t3_ClickAsync" />
+        <Button Grid.Row="1" Grid.Column="2"  Content="t3"   Width="50" x:Name="t3" Click="t3_ClickAsync" />
         <Button Grid.Row="1" Grid.Column="3"  Content="t4"   Width="50" x:Name="t4" Click="t4_Click" />
         <TextBox x:Name="demoText" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Height="150" />
         <TextBox AcceptsReturn="True"
