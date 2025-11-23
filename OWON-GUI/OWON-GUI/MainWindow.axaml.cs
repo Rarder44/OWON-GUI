@@ -1,10 +1,15 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Data;
+using Avalonia.Interactivity;
+using Avalonia.Media;
 using Avalonia.Threading;
 using OWON_GUI.Classes;
 using System;
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,12 +33,23 @@ namespace OWON_GUI
             comboBoxPorts.ItemsSource = SerialPort.GetPortNames().ToList();
 
             if (!Design.IsDesignMode)
-                _owonSerialCom.init("COM3");
+            {
+                comboBoxPorts.ItemsSource = SerialPort.GetPortNames().ToList();
+                _owonSerialCom.init(SerialPort.GetPortNames().ToList().FirstOrDefault("COM3"));
+            }
+
 
 
             this.DataContext = this;
 
+
+
+            //entryCStop.CreateSuspendableBind(TextBox.TextProperty, "OwonSerialCom.CurrentLimit", BindingMode.OneWay);
         }
+
+
+
+
 
         private void Com_RawDataReceived(object sender, byte[] rawData)
         {
@@ -99,12 +115,19 @@ namespace OWON_GUI
             */
             //await t;
 
+            //_owonSerialCom.acquireSetupValues();
+
+            _owonSerialCom.CurrentLimit += 0.001f;
+
 
         }
         FastReadType type = FastReadType.Current_Voltage_Power;
         private void t2_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            _owonSerialCom.StartFastReadData(type);
+            //_owonSerialCom.StartFastReadData(type);
+            //entryCStop.BindingRestore();
+
+
         }
 
         private async void t3_ClickAsync(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
@@ -125,8 +148,32 @@ namespace OWON_GUI
 
         }
 
-        private void Led_ActualThemeVariantChanged(object? sender, EventArgs e)
+
+        TextBox Cloned;
+      
+        private void Cloned_KeyDown(object? sender, Avalonia.Input.KeyEventArgs e)
         {
+            if (e.Key == Avalonia.Input.Key.Escape)
+            {
+                Cloned.RestoreOriginal(entryCStop);
+            }
+            else if (e.Key == Avalonia.Input.Key.Enter)
+            {
+                //TODO: salva
+                Cloned.RestoreOriginal(entryCStop);
+            }
+        }
+
+        private void entryCStop_DoubleTapped(object? sender, Avalonia.Input.TappedEventArgs e)
+        {
+            var tb = sender as Avalonia.Controls.TextBox;
+            //entryCStop.BindingSuspend();
+            Cloned = entryCStop.CloneAndReplace();
+            Cloned.SetValue(ToolTip.TipProperty, "ENTER to confirm value\nESC to cancel");
+            Cloned.KeyDown += Cloned_KeyDown;
+            Cloned.Classes.Add("InEdit");
+            Cloned.Focus();
+
         }
     }
 }

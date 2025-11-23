@@ -67,7 +67,7 @@
             <Style Selector="^[Tag=False]">
                 <Setter Property="Background" Value="White"/>
 
-
+                <!-- quando il mouse è sopra all'elemento per dagli lo stile bisogna fare l'override del template... -->
                 <Style Selector="^:pointerover /template/ ContentPresenter">
                     <Setter Property="Background" Value="#FF94DFFF"/>
                     <Setter Property="BorderBrush" Value="Black"/>
@@ -76,13 +76,23 @@
             </Style>
             
 
-            
+        </Style>
 
+        <Style Selector="TextBox.InEdit">
+            <Setter Property="Background" Value="LightBlue"></Setter>
+            <Setter Property="HorizontalContentAlignment" Value="Right"></Setter>
             
-
+            <Style Selector="^:pointerover /template/ Border">
+                    <Setter Property="Background" Value="LightBlue"/>
+            </Style>
+            <Style Selector="^:focus /template/ Border">
+                    <Setter Property="Background" Value="LightBlue"/>
+                    <Setter Property="BorderBrush" Value="Black"/>
+            </Style>  
+         
         </Style>
         
-         
+       
         
 
 
@@ -158,7 +168,7 @@
 
 
                     <Button Content="->" Padding="0"  Grid.Row="0" Grid.Column="0"></Button>
-                    <TextBox x:Name="entryV"  Classes="FloatVal" Grid.Row="0" Grid.Column="1"/>
+                    <TextBox x:Name="entryV"  Classes="FloatVal" Grid.Row="0" Grid.Column="1" Text="{Binding OwonSerialCom.Voltage}" />
                     <Label VerticalAlignment="Center" Content="V"  Grid.Row="0" Grid.Column="2"/>
                     <controls:Led 
                         Diameter="25" 
@@ -176,7 +186,7 @@
 
 
                     <Button Content="->" Padding="0"  Grid.Row="1" Grid.Column="0"></Button>
-                    <TextBox x:Name="entryVStop"  Classes="FloatVal" Grid.Row="1" Grid.Column="1"/>
+                    <TextBox x:Name="entryVStop"  Classes="FloatVal" Grid.Row="1" Grid.Column="1" Text="{Binding OwonSerialCom.VoltageLimit}"/>
                     <Label VerticalAlignment="Center" Content="V Stop"  Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2"/>
                 </Grid>
             </StackPanel>
@@ -213,7 +223,7 @@
 
 
                     <Button Content="->" Padding="0"  Grid.Row="0" Grid.Column="0"></Button>
-                    <TextBox x:Name="entryC" Classes="FloatVal"  Grid.Row="0" Grid.Column="1"/>
+                    <TextBox x:Name="entryC" Classes="FloatVal"  Grid.Row="0" Grid.Column="1" Text="{Binding OwonSerialCom.Current}"/>
                     <Label VerticalAlignment="Center" Content="A"  Grid.Row="0" Grid.Column="2"/>
                      <controls:Led 
                         Diameter="25" 
@@ -229,7 +239,10 @@
 
 
                     <Button Content="->" Padding="0"  Grid.Row="1" Grid.Column="0"></Button>
-                    <TextBox x:Name="entryCStop" Classes="FloatVal"  Grid.Row="1" Grid.Column="1"/>
+                    <TextBox x:Name="entryCStop" Classes="FloatVal"  Grid.Row="1" Grid.Column="1" Text="{Binding OwonSerialCom.CurrentLimit, Mode=OneWay}"
+                             DoubleTapped="entryCStop_DoubleTapped"
+                              >
+                        </TextBox>
                     <Label VerticalAlignment="Center" Content="A Stop"  Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2"/>
                 </Grid>
             </StackPanel>

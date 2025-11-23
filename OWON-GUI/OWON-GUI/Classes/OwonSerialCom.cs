@@ -88,7 +88,8 @@ namespace OWON_GUI.Classes
 
 
         private String _firmware = null;
-        public String Firmware { get
+        public String Firmware { 
+            get
             {
                 if( _firmware!=null )
                     return _firmware;
@@ -197,8 +198,6 @@ namespace OWON_GUI.Classes
                 return _currentRT;
             }
         }
-
-
         private float _powerRT = 0;
         public float PowerRT
         {
@@ -212,6 +211,69 @@ namespace OWON_GUI.Classes
                 return _powerRT;
             }
         }
+
+
+
+
+
+        private float _current = 0;
+        public float Current
+        {
+            get
+            {
+                return _current;
+            }
+            set
+            {
+                setCurrent(value);
+                OnPropertyChanged();
+            }
+        }
+        private float _voltage = 0;
+        public float Voltage
+        {
+            get
+            {
+                return _voltage;
+            }
+            set
+            {
+                setVoltage(value);
+                OnPropertyChanged();
+            }
+        }
+
+        private float _currentLimit = 0;
+        public float CurrentLimit
+        {
+            get
+            {
+                return _currentLimit;
+            }
+            set
+            {
+                setCurrentLimit(value);
+                _currentLimit = value;
+                OnPropertyChanged();
+            }
+        }
+        private float _voltageLimit = 0;
+        public float VoltageLimit
+        {
+            get
+            {
+                return _voltageLimit;
+            }
+            set
+            {
+                setVoltageLimit(value);
+                OnPropertyChanged();
+            }
+        }
+
+
+
+
 
         private bool _overVoltage;
         public bool OverVoltage
@@ -294,14 +356,17 @@ namespace OWON_GUI.Classes
         SerialComunicationManager comManager = null;
          
 
-        public void init(String COM)
+        async public void init(String COM)
         {
             comManager = new SerialComunicationManager(COM,115200,Parity.None,8,StopBits.One);
 
-            acquireDeviceInfo();
+            await acquireDeviceInfo();
+            await acquireRTValues();
+            await acquireSetupValues();
             IsLocked = false;
+
         }
-        async private void acquireDeviceInfo()
+        async private Task acquireDeviceInfo()
         {
 
             String s =  await comManager.makeRequest("*IDN?\n");
@@ -422,17 +487,52 @@ namespace OWON_GUI.Classes
         async public Task acquireSetupValues()
         {
             //CURRent?
+            _current = await acquireGenericValue("CURR?");
+            OnPropertyChanged(nameof(Current));
+
             //CURRent:LIMit?
+            _currentLimit = await acquireGenericValue("CURR:LIM?");
+            OnPropertyChanged(nameof(CurrentLimit));
 
             //VOLTage?
-            //VOLTage:LIMit?
+            _voltage = await acquireGenericValue("VOLT?");
+            OnPropertyChanged(nameof(Voltage));
 
+            //VOLTage:LIMit?
+            _voltageLimit = await acquireGenericValue("VOLT:LIM?");
+            OnPropertyChanged(nameof(VoltageLimit));
+
+        }
+
+        async Task<float> acquireGenericValue(String command)
+        {
+            command = command.Trim();
+            String s = await comManager.makeRequest(command+"\n");
+            float v;
+            s = s.Trim();
+            if (float.TryParse(s, System.Globalization.CultureInfo.InvariantCulture, out v))
+                return v;
+            else
+                throw new OWONProtocolException("CURR? ( CURRent? ) string not correctly formatted");
+             
         }
 
 
         async public Task acquireOutputStatus()
         {
-            //OUTPut?
+            String s = await comManager.makeRequest("OUTP?\n");   //OUTPut?
+
+            s = s.Trim();
+            
+            if (s=="ON" || s=="1")
+                _isPowered = true;
+            else if (s == "OFF" || s == "0")
+                _isPowered = false;
+            else
+                throw new OWONProtocolException("OUTP? ( OUTPut? ) string not correctly formatted");
+
+            OnPropertyChanged(nameof(IsPowered));
+
         }
 
 
