@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using OWON_GUI.Converter;
+using System.Threading;
 
 namespace OWON_GUI.Classes
 {
@@ -226,6 +227,7 @@ namespace OWON_GUI.Classes
             set
             {
                 setCurrent(value);
+                _current = value;
                 OnPropertyChanged();
             }
         }
@@ -239,6 +241,7 @@ namespace OWON_GUI.Classes
             set
             {
                 setVoltage(value);
+                _voltage= value;
                 OnPropertyChanged();
             }
         }
@@ -267,6 +270,7 @@ namespace OWON_GUI.Classes
             set
             {
                 setVoltageLimit(value);
+                _voltageLimit = value;
                 OnPropertyChanged();
             }
         }
@@ -349,7 +353,7 @@ namespace OWON_GUI.Classes
 
 
         private CancellableTask ContinuosLockTask = null;
-        private CancellableTask NormalFetchDataTask = null;
+        private CancellableTask NormalReadDataTask = null;
 
                 
 
@@ -486,6 +490,7 @@ namespace OWON_GUI.Classes
 
         async public Task acquireSetupValues()
         {
+            
             //CURRent?
             _current = await acquireGenericValue("CURR?");
             OnPropertyChanged(nameof(Current));
@@ -538,20 +543,25 @@ namespace OWON_GUI.Classes
 
         private async void setCurrent(float current)
         {
-           
+            string formatted = current.ToString("F3", System.Globalization.CultureInfo.InvariantCulture);
+            await comManager.makeRequestWithoutResponse("CURR " + formatted + "\n");
         }
         private async void setCurrentLimit(float currentLimit)
         {
-
+            //CURRent:LIMit <value>
+            string formatted = currentLimit.ToString("F3", System.Globalization.CultureInfo.InvariantCulture);
+            await comManager.makeRequestWithoutResponse("CURR:LIM "+ formatted + "\n");
         }
 
         private async void setVoltage(float voltage)
         {
-
+            string formatted = voltage.ToString("F3", System.Globalization.CultureInfo.InvariantCulture);
+            await comManager.makeRequestWithoutResponse("VOLT " + formatted + "\n");
         }
         private async void setVoltageLimit(float voltageLimit)
         {
-
+            string formatted = voltageLimit.ToString("F3", System.Globalization.CultureInfo.InvariantCulture);
+            await comManager.makeRequestWithoutResponse("VOLT:LIM " + formatted + "\n");
         }
 
 
@@ -574,6 +584,32 @@ namespace OWON_GUI.Classes
             return await frs.Stop();
         }
 
+
+
+        async public void StartNormalReadData()
+        {
+            if(NormalReadDataTask!=null)
+                throw new InvalidOperationException("Can't start NormalReadData because the service is already running.");
+
+            NormalReadDataTask = new CancellableTask(async (CancellationToken ct) =>{
+                while(!ct.IsCancellationRequested)
+                {
+                    await acquireRTValues();
+                    await acquireSetupValues();
+                    await Task.Delay(1000);
+                }
+            });
+
+            NormalReadDataTask.Start();
+        }
+
+        async public void StopNormalReadData()
+        {
+            if(NormalReadDataTask==null) throw new InvalidOperationException("Can't stop NormalReadData because the service is already stopped.");
+
+            NormalReadDataTask.Cancel();
+            await NormalReadDataTask.InnerTask;
+        }
 
     }
 }

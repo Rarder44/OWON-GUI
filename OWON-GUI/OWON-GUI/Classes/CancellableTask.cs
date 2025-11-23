@@ -18,7 +18,11 @@ namespace OWON_GUI.Classes
             InnerTask = new Task(() => action(_cts.Token), _cts.Token);
         }
 
+        /// <summary>
+        /// Requests cancellation of the associated Task.
+        /// </summary>
         public void Cancel() => _cts.Cancel();
+        public void Start() => InnerTask.Start();
 
         // la classe diventa automaticamente un Task
         public static implicit operator Task(CancellableTask ct)

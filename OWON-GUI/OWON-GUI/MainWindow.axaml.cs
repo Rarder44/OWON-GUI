@@ -23,6 +23,7 @@ namespace OWON_GUI
         public OwonSerialCom OwonSerialCom { get { return _owonSerialCom; } }
 
 
+        
 
 
         public MainWindow()
@@ -43,8 +44,11 @@ namespace OWON_GUI
             this.DataContext = this;
 
 
-
-            //entryCStop.CreateSuspendableBind(TextBox.TextProperty, "OwonSerialCom.CurrentLimit", BindingMode.OneWay);
+            if (!Design.IsDesignMode)
+            {
+                _owonSerialCom.StartNormalReadData();
+            }
+            
         }
 
 
@@ -55,8 +59,6 @@ namespace OWON_GUI
         {
             Dispatcher.UIThread.Post(() => demoText.Text += rawData.ToASCIIString());
         }
-
-
 
 
 
@@ -77,6 +79,42 @@ namespace OWON_GUI
 
 
         }
+
+
+        private void entryTxt_DoubleTapped(object? sender, Avalonia.Input.TappedEventArgs e)
+        {
+            var tb = sender as Avalonia.Controls.TextBox;
+            TextBox Cloned = tb.CloneAndReplace();
+            Cloned.SetValue(ToolTip.TipProperty, "ENTER to confirm value\nESC to cancel");
+            Cloned.KeyDown += (object? sender, Avalonia.Input.KeyEventArgs e) =>
+            {
+                if (e.Key == Avalonia.Input.Key.Escape)
+                {
+                    Cloned.RestoreOriginal(tb);
+                }
+                else if (e.Key == Avalonia.Input.Key.Enter)
+                {
+                    
+                    float v = float.Parse(Cloned.Text.Replace(".",","));
+                    if (tb == entryC)
+                        OwonSerialCom.Current = v;
+                    if (tb == entryCStop)
+                        OwonSerialCom.CurrentLimit = v;
+                    if (tb == entryV)
+                        OwonSerialCom.Voltage = v;
+                    if (tb == entryVStop)
+                        OwonSerialCom.VoltageLimit = v;
+
+                    Cloned.RestoreOriginal(tb);
+                }
+            };
+            Cloned.Classes.Add("InEdit");
+            Cloned.Classes.Remove("ReadOnly");
+            Cloned.IsReadOnly = false;
+            Cloned.Focus();
+
+        }
+
 
         private async void t1_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
@@ -115,9 +153,7 @@ namespace OWON_GUI
             */
             //await t;
 
-            //_owonSerialCom.acquireSetupValues();
-
-            _owonSerialCom.CurrentLimit += 0.001f;
+            _owonSerialCom.acquireSetupValues();
 
 
         }
@@ -149,31 +185,8 @@ namespace OWON_GUI
         }
 
 
-        TextBox Cloned;
-      
-        private void Cloned_KeyDown(object? sender, Avalonia.Input.KeyEventArgs e)
-        {
-            if (e.Key == Avalonia.Input.Key.Escape)
-            {
-                Cloned.RestoreOriginal(entryCStop);
-            }
-            else if (e.Key == Avalonia.Input.Key.Enter)
-            {
-                //TODO: salva
-                Cloned.RestoreOriginal(entryCStop);
-            }
-        }
 
-        private void entryCStop_DoubleTapped(object? sender, Avalonia.Input.TappedEventArgs e)
-        {
-            var tb = sender as Avalonia.Controls.TextBox;
-            //entryCStop.BindingSuspend();
-            Cloned = entryCStop.CloneAndReplace();
-            Cloned.SetValue(ToolTip.TipProperty, "ENTER to confirm value\nESC to cancel");
-            Cloned.KeyDown += Cloned_KeyDown;
-            Cloned.Classes.Add("InEdit");
-            Cloned.Focus();
 
-        }
+
     }
 }

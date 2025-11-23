@@ -144,11 +144,21 @@
                     <Grid.ColumnDefinitions>
                         
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="30"/>
                     </Grid.ColumnDefinitions>
 
                     <TextBox x:Name="entryV_RT" Text="{Binding OwonSerialCom.VoltageRT}" Grid.Column="0" Classes="ReadOnly FloatVal"/>
                     <Label Content="V" Grid.Column="1"  />
+                     <controls:Led 
+                        Diameter="25" 
+                        OnColor="#FF0000" 
+                        OffColor="#770000"
+                        Text="OV" 
+                        TextColor="#000000"
+                        IsOn="{Binding OwonSerialCom.OverVoltage}" 
+                        Grid.Row="0" Grid.Column="2"
+                        />
                 </Grid>
 
                 
@@ -157,8 +167,7 @@
                     <Grid.ColumnDefinitions>
                  
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="20"/>
-                        <ColumnDefinition Width="30"/>
+                        <ColumnDefinition Width="50"/>
 
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
@@ -167,25 +176,16 @@
                     </Grid.RowDefinitions>
 
 
-                    <TextBox x:Name="entryV"  Classes="FloatVal" Grid.Row="0" Grid.Column="0" Text="{Binding OwonSerialCom.Voltage}" />
+                    <TextBox x:Name="entryV"  Classes="ReadOnly FloatVal" Grid.Row="0" Grid.Column="0" Text="{Binding OwonSerialCom.Voltage}" />
                     <Label VerticalAlignment="Center" Content="V"  Grid.Row="0" Grid.Column="1"/>
-                    <controls:Led 
-                        Diameter="25" 
-                        OnColor="#FF0000" 
-                        OffColor="#770000"
-                        Text="OV" 
-                        TextColor="#000000"
-                        IsOn="{Binding OwonSerialCom.OverVoltage}" 
-    
-                        Grid.Row="0" Grid.Column="3"
-                        />
+                   
 	
                     
 
 
 
-                    <TextBox x:Name="entryVStop"  Classes="FloatVal" Grid.Row="1" Grid.Column="0" Text="{Binding OwonSerialCom.VoltageLimit}"/>
-                    <Label VerticalAlignment="Center" Content="V Stop"  Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"/>
+                    <TextBox x:Name="entryVStop"  Classes="ReadOnly FloatVal" Grid.Row="1" Grid.Column="0" Text="{Binding OwonSerialCom.VoltageLimit}"/>
+                    <Label VerticalAlignment="Center" Content="V Stop"  Grid.Row="1" Grid.Column="1" />
                 </Grid>
             </StackPanel>
         </Border>
@@ -198,31 +198,13 @@
                     <Grid.ColumnDefinitions>
      
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="30"/>
                     </Grid.ColumnDefinitions>
 
                     <TextBox x:Name="entryC_RT" Grid.Column="0" Classes="ReadOnly FloatVal" Text="{Binding OwonSerialCom.CurrentRT}" />
                     <Label Content="A" Grid.Column="1"/>
-                </Grid>
-
-                <Border Height="1" Background="Gray" Margin="0,10" />
-                <Grid HorizontalAlignment="Stretch">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="20"/>
-                        <ColumnDefinition Width="30"/>
-
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-
-
-                   
-                    <TextBox x:Name="entryC" Classes="FloatVal"  Grid.Row="0" Grid.Column="0" Text="{Binding OwonSerialCom.Current}"/>
-                    <Label VerticalAlignment="Center" Content="A"  Grid.Row="0" Grid.Column="1"/>
-                     <controls:Led 
+                    <controls:Led 
                         Diameter="25" 
                         OnColor="#FF0000" 
                         OffColor="#770000"
@@ -232,15 +214,33 @@
     
                         Grid.Row="0" Grid.Column="3"
                         />
+                </Grid>
+
+                <Border Height="1" Background="Gray" Margin="0,10" />
+                <Grid HorizontalAlignment="Stretch">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="50"/>
+
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+
+                   
+                    <TextBox x:Name="entryC" Classes="ReadOnly FloatVal"  Grid.Row="0" Grid.Column="0" Text="{Binding OwonSerialCom.Current}" DoubleTapped="entryTxt_DoubleTapped" />
+                    <Label VerticalAlignment="Center" Content="A"  Grid.Row="0" Grid.Column="1"/>
+                     
 
 
 
                     
-                    <TextBox x:Name="entryCStop" Classes="FloatVal"  Grid.Row="1" Grid.Column="0" Text="{Binding OwonSerialCom.CurrentLimit, Mode=OneWay}"
-                             DoubleTapped="entryCStop_DoubleTapped"
-                              >
+                    <TextBox x:Name="entryCStop" Classes="ReadOnly FloatVal"  Grid.Row="1" Grid.Column="0" Text="{Binding OwonSerialCom.CurrentLimit, Mode=OneWay}"
+                             DoubleTapped="entryTxt_DoubleTapped">
                         </TextBox>
-                    <Label VerticalAlignment="Center" Content="A Stop"  Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"/>
+                    <Label VerticalAlignment="Center" Content="A Stop"  Grid.Row="1" Grid.Column="1"/>
                 </Grid>
             </StackPanel>
         </Border>

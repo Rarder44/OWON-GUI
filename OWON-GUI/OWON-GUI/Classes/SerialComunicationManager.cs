@@ -53,12 +53,34 @@ namespace OWON_GUI.Classes
         }
 
 
+        /*async public Task<byte[]> readAll()
+        {
+
+            await semaphore.WaitAsync();
+            Debug.WriteLine("S WAIT readAll");
+            try
+            {
+                return com.ReadAll();
+            }
+            finally
+            {
+                semaphore.Release();
+                Debug.WriteLine("S RELEASE 1");
+            }
+        }*/
 
         async public Task<String> makeRequest(String request)
         {
+            
+
             Debug.WriteLine(request);
             await semaphore.WaitAsync();
             Debug.WriteLine("S WAIT 1");
+
+            //prima di qualsiasi richiesta cancello tutto ciò che c'è nel buffer che potrebbe sballare 
+            com.ReadAll();
+
+
             try
             {
                 com.Write(request);
@@ -75,10 +97,17 @@ namespace OWON_GUI.Classes
 
         async public Task makeRequestWithoutResponse(String request)
         {
+
+           
+
+
             Debug.WriteLine(request);
 
             await semaphore.WaitAsync();
             Debug.WriteLine("S WAIT 2");
+
+            //prima di qualsiasi richiesta cancello tutto ciò che c'è nel buffer che potrebbe sballare 
+            com.ReadAll();
 
             try
             {
