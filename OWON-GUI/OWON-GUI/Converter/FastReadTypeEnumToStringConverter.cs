@@ -26,9 +26,9 @@ namespace OWON_GUI.Converter
                 return "V";
             else if (type == FastReadType.Power)
                 return "W";
-            else if (type == FastReadType.Current_Voltage)
+            else if (type == (FastReadType.Current | FastReadType.Voltage))
                 return "A & V";
-            else if (type == FastReadType.Current_Voltage_Power)
+            else if (type == (FastReadType.Current | FastReadType.Voltage | FastReadType.Power))
                 return "A, V & W";
 
             return null;

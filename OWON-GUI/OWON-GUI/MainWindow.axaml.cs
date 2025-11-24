@@ -8,6 +8,8 @@ using OWON_GUI.Classes;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.IO.Ports;
 using System.Linq;
 using System.Reflection;
@@ -52,17 +54,43 @@ namespace OWON_GUI
                 _owonSerialCom.StartNormalReadData();
             }
 
+            OwonFastReadingService.Instance.ReadingUpdate += Instance_ReadingUpdate; ;
+
         }
 
-
-
-
-
-        private void Com_RawDataReceived(object sender, byte[] rawData)
+        private void Instance_ReadingUpdate(OwonFastReadingService sender, FastDataRawEntry[] rawSpeedData, FastReadType type)
         {
-            Dispatcher.UIThread.Post(() => demoText.Text += rawData.ToASCIIString());
+            if (rawSpeedData.Length == 0)
+                return;
+
+            FastDataEntry first = new FastDataEntry(rawSpeedData[0], type);
+            double capacity = 0;
+            String UM = "mAh";
+
+            for (int i = 1; i < rawSpeedData.Length; i++)
+            {
+                FastDataEntry second=new FastDataEntry(rawSpeedData[i], type);
+                capacity += first.calculateCapacity(second);
+
+                first = second;
+            }
+
+
+            if(capacity>1000)
+            {
+                capacity /= 1000d;
+                UM = "Ah";
+            }
+
+            Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                FastReadValuesNumber.Content = rawSpeedData.Length.ToString();
+                FastReadConsumedValue.Content = capacity.ToString("F3");
+                FastReadConsumedUM.Content = UM;
+            });
         }
 
+        
 
 
         private void btnLock_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
@@ -160,7 +188,8 @@ namespace OWON_GUI
 
 
         }
-        FastReadType type = FastReadType.Current_Voltage_Power;
+
+     
         private void t2_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             
@@ -190,7 +219,9 @@ namespace OWON_GUI
             if( !_owonSerialCom.IsFastReadingServiceRunning)
             {
                 //START
-                FastReadDataTypeCombo.IsEditable= false;
+                FastReadDataTypeCombo.IsEnabled = false;
+
+
                 _owonSerialCom.StartFastReadData(type);
 
             }
@@ -198,13 +229,30 @@ namespace OWON_GUI
             {
                 //STOP
                 List<FastDataRawEntry> res = await _owonSerialCom.StopFastReadData();
-                FastReadDataTypeCombo.IsEditable = true;
+                FastReadDataTypeCombo.IsEnabled = true;
 
+
+
+
+                List<FastDataEntry> AllData = new List<FastDataEntry>();
 
                 foreach (var item in res)
                 {
-                    demoText.Text += new FastDataEntry(item, type) + "\n";
+                    var tmp = new FastDataEntry(item, type);
+                    AllData.Add(tmp);                  
                 }
+
+                var now = DateTime.Now;
+                string fileName = $"FastReads\\{now:yyyy-MM-dd} _ {now:HH-mm-ss}.csv";
+
+                var folder = System.IO.Path.GetDirectoryName(fileName);
+                if (!string.IsNullOrEmpty(folder) && !System.IO.Directory.Exists(folder))
+                    System.IO.Directory.CreateDirectory(folder);
+
+
+                File.WriteAllText(fileName, FastDataEntry.CreateCsv(AllData));
+
+                
             }
 
         }

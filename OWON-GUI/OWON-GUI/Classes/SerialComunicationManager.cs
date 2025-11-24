@@ -85,7 +85,7 @@ namespace OWON_GUI.Classes
             {
                 com.Write(request);
                 String s = await com.ReadLineAsync();
-                Debug.WriteLine(s.Trim());
+                Debug.WriteLine(s?.Trim());
                 return s;
             }
             finally

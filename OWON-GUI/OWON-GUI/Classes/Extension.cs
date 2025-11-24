@@ -4,9 +4,11 @@ using Avalonia.Data;
 using Avalonia.Data.Core;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -81,6 +83,9 @@ namespace OWON_GUI.Classes
             sp.Read(temp, 0, temp.Length);
             return temp;
         }
+
+
+
 
 
 

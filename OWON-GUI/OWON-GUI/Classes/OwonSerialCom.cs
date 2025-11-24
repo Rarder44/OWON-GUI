@@ -346,7 +346,14 @@ namespace OWON_GUI.Classes
         #endregion
 
 
-        public Array FastReadTypeEnumValues => Enum.GetValues(typeof(FastReadType));
+        public FastReadType[] FastReadTypeEnumValues => new FastReadType[]
+            {
+                FastReadType.Current,
+                FastReadType.Voltage,
+                FastReadType.Power,
+                FastReadType.Current | FastReadType.Voltage,
+                FastReadType.Current | FastReadType.Voltage | FastReadType.Power,
+            };
 
 
 
@@ -361,7 +368,7 @@ namespace OWON_GUI.Classes
 
         public bool IsFastReadingServiceRunning
         { 
-            get => OwnFastReadingService.Instance.IsRunning;  
+            get => OwonFastReadingService.Instance.IsRunning;  
         }
 
                 
@@ -378,7 +385,38 @@ namespace OWON_GUI.Classes
             await acquireSetupValues();
             IsLocked = false;
 
+
+            OwonFastReadingService.Instance.ReadingUpdate += Instance_ReadingUpdate;
+
+            
         }
+
+        private void Instance_ReadingUpdate(OwonFastReadingService sender, FastDataRawEntry[] rawSpeedData, FastReadType type)
+        {
+            if (rawSpeedData.Length == 0) return;
+            FastDataEntry fda = new FastDataEntry(rawSpeedData[rawSpeedData.Length - 1], type);
+
+            if(type.HasFlag( FastReadType.Current))
+            {
+                _currentRT = (float)fda.Current;
+                OnPropertyChanged(nameof(CurrentRT));
+            }
+
+            if (type.HasFlag(FastReadType.Voltage))
+            {
+                _voltageRT = (float)fda.Voltage;
+                OnPropertyChanged(nameof(VoltageRT));
+            }
+
+            if (type.HasFlag(FastReadType.Power))
+            {
+                _powerRT = (float)fda.Power;
+                OnPropertyChanged(nameof(PowerRT));
+            }
+
+
+        }
+
         async private Task acquireDeviceInfo()
         {
 
@@ -466,6 +504,7 @@ namespace OWON_GUI.Classes
                 if (DateTime.Now > invalidationDate)
                 {
                     String str = await comManager.makeRequest("MEAS:ALL:INFO?\n");
+                    if (str == null) return;
                     String[] parts = str.Split(',');
                     _voltageRT = float.Parse(parts[0], System.Globalization.CultureInfo.InvariantCulture);
                     _currentRT = float.Parse(parts[1], System.Globalization.CultureInfo.InvariantCulture);
@@ -586,7 +625,8 @@ namespace OWON_GUI.Classes
         async public void StartFastReadData(FastReadType type)
         {
 
-            OwnFastReadingService frs = OwnFastReadingService.Instance;
+            OwonFastReadingService frs = OwonFastReadingService.Instance;
+           
             if (frs.IsRunning )
                 throw new InvalidOperationException("Can't start FastReadData because the service is already running.");
 
@@ -598,9 +638,11 @@ namespace OWON_GUI.Classes
 
         }
 
+
+
         async public Task<List<FastDataRawEntry>> StopFastReadData()
         {
-            OwnFastReadingService frs = OwnFastReadingService.Instance;
+            OwonFastReadingService frs = OwonFastReadingService.Instance;
             List<FastDataRawEntry> tmp = await frs.Stop();
 
             OnPropertyChanged(nameof(IsFastReadingServiceRunning));
@@ -608,6 +650,10 @@ namespace OWON_GUI.Classes
             return tmp;
 
         }
+
+
+
+
 
 
 

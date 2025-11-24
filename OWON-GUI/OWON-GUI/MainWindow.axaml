@@ -1,431 +1,461 @@
 <Window xmlns="https://github.com/avaloniaui"
-        xmlns:classes="using:OWON_GUI.Classes"
-        xmlns:controls="using:OWON_GUI.Controls"
-        xmlns:converters="using:OWON_GUI.Converter"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:local="using:OWON_GUI"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:system="using:System"
-        mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="450"
-        MinWidth="700" MinHeight="450"
-        x:Class="OWON_GUI.MainWindow"
-        x:DataType="local:MainWindow"
-        Title="OWON_GUI">
-     <Window.Styles>
-        
-
-        <Style Selector="TextBox">
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-        </Style>
-        <Style Selector="Label, Button">
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-        </Style>
-         <Style Selector="Button">
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-        </Style>
+		xmlns:classes="using:OWON_GUI.Classes"
+		xmlns:controls="using:OWON_GUI.Controls"
+		xmlns:converters="using:OWON_GUI.Converter"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:local="using:OWON_GUI"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:system="using:System"
+		mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="450"
+		MinWidth="800" MinHeight="400"
+		x:Class="OWON_GUI.MainWindow"
+		x:DataType="local:MainWindow"
+		Title="OWON_GUI">
+	<Window.Styles>
 
 
-         <Style Selector="TextBox.ReadOnly">
-            <Setter Property="IsReadOnly" Value="True"/>
-        </Style>
-
-         <Style Selector="TextBox.FloatVal">
-            <Setter Property="HorizontalContentAlignment" Value="Right"/>
-        </Style>
-
-        <Style Selector="TextBox.FloatVal">
-            <Setter Property="HorizontalContentAlignment" Value="Right"/>
-        </Style>
+		<Style Selector="TextBox">
+			<Setter Property="VerticalContentAlignment" Value="Center"/>
+		</Style>
+		<Style Selector="Label, Button">
+			<Setter Property="VerticalContentAlignment" Value="Center"/>
+		</Style>
+		<Style Selector="Button">
+			<Setter Property="HorizontalContentAlignment" Value="Center"/>
+		</Style>
 
 
+		<Style Selector="TextBox.ReadOnly">
+			<Setter Property="IsReadOnly" Value="True"/>
+		</Style>
+
+		<Style Selector="TextBox.FloatVal">
+			<Setter Property="HorizontalContentAlignment" Value="Right"/>
+		</Style>
+
+		<Style Selector="TextBox.FloatVal">
+			<Setter Property="HorizontalContentAlignment" Value="Right"/>
+		</Style>
 
 
-         <Style Selector="Button#btnOnOff">
-            <Setter Property="BorderBrush" Value="Black"/>
-            <Setter Property="Margin" Value="10,10,0,0"/>
-            <Setter Property="Width" Value="100"/>
-            <Setter Property="Height" Value="40"/>
-            <Setter Property="VerticalAlignment" Value="Top"/>
-            <Setter Property="FontSize" Value="20"/>
-
-            <Style Selector="^:pointerover">
-               <Setter Property="Background" Value="LightBlue"/>
-            </Style>
-
-             <!-- Use tag for simple databinding True -> On | False -> Off -->
-            <Style Selector="^[Tag=True]">
-                <Setter Property="Background" Value="#038cfc"/>
-
-                 <!-- WTF is ContentPresenter?!? no sense -->
-                <Style Selector="^:pointerover /template/ ContentPresenter">
-                    <Setter Property="Background" Value="#FF05B2FF"/>
-                    <Setter Property="BorderBrush" Value="Black"/>
-
-                </Style>
-            </Style>
-            <Style Selector="^[Tag=False]">
-                <Setter Property="Background" Value="White"/>
-
-                <!-- quando il mouse è sopra all'elemento per dagli lo stile bisogna fare l'override del template... -->
-                <Style Selector="^:pointerover /template/ ContentPresenter">
-                    <Setter Property="Background" Value="#FF94DFFF"/>
-                    <Setter Property="BorderBrush" Value="Black"/>
-
-                </Style>
-            </Style>
-            
-
-        </Style>
-
-        <Style Selector="TextBox.InEdit">
-            <Setter Property="Background" Value="LightBlue"></Setter>
-            <Setter Property="HorizontalContentAlignment" Value="Right"></Setter>
-            
-            <Style Selector="^:pointerover /template/ Border">
-                    <Setter Property="Background" Value="LightBlue"/>
-            </Style>
-            <Style Selector="^:focus /template/ Border">
-                    <Setter Property="Background" Value="LightBlue"/>
-                    <Setter Property="BorderBrush" Value="Black"/>
-            </Style>  
-         
-        </Style>
-        
-       
-        
 
 
-        <!--<Style Selector="Path#svgLockStatus">
-             <Setter Property="VerticalAlignment" Value="Center"/>
-             <Setter Property="HorizontalAlignment" Value="Stretch"/>
+		<Style Selector="Button#btnOnOff">
+			<Setter Property="BorderBrush" Value="Black"/>
+			<Setter Property="Margin" Value="10,10,0,0"/>
+			<Setter Property="Width" Value="100"/>
+			<Setter Property="Height" Value="40"/>
+			<Setter Property="VerticalAlignment" Value="Top"/>
+			<Setter Property="FontSize" Value="20"/>
 
-            <Style Selector="^.lock">
-                <Setter Property="Fill" Value="Red"/>
-                <Setter Property="Data" Value="M8 0a4 4 0 0 1 4 4v2.05a2.5 2.5 0 0 1 2 2.45v5a2.5 2.5 0 0 1-2.5 2.5h-7A2.5 2.5 0 0 1 2 13.5v-5a2.5 2.5 0 0 1 2-2.45V4a4 4 0 0 1 4-4m0 1a3 3 0 0 0-3 3v2h6V4a3 3 0 0 0-3-3"/>
-            </Style>
-             <Style Selector="^.unlock">
-                <Setter Property="Fill" Value="Green"/>
-                <Setter Property="Data" Value="M12 0a4 4 0 0 1 4 4v2.5h-1V4a3 3 0 1 0-6 0v2h.5A2.5 2.5 0 0 1 12 8.5v5A2.5 2.5 0 0 1 9.5 16h-7A2.5 2.5 0 0 1 0 13.5v-5A2.5 2.5 0 0 1 2.5 6H8V4a4 4 0 0 1 4-4"/>
-            </Style>
-        </Style>-->
+			<Style Selector="^:pointerover">
+				<Setter Property="Background" Value="LightBlue"/>
+			</Style>
 
-         
-         <Style Selector="Button#FastReadingStartStop">
+			<!-- Use tag for simple databinding True -> On | False -> Off -->
+			<Style Selector="^[Tag=True]">
+				<Setter Property="Background" Value="#038cfc"/>
+
+				<!-- WTF is ContentPresenter?!? no sense -->
+				<Style Selector="^:pointerover /template/ ContentPresenter">
+					<Setter Property="Background" Value="#FF05B2FF"/>
+					<Setter Property="BorderBrush" Value="Black"/>
+
+				</Style>
+			</Style>
+			<Style Selector="^[Tag=False]">
+				<Setter Property="Background" Value="White"/>
+
+				<!-- quando il mouse è sopra all'elemento per dagli lo stile bisogna fare l'override del template... -->
+				<Style Selector="^:pointerover /template/ ContentPresenter">
+					<Setter Property="Background" Value="#FF94DFFF"/>
+					<Setter Property="BorderBrush" Value="Black"/>
+
+				</Style>
+			</Style>
+
+
+		</Style>
+
+		<Style Selector="TextBox.InEdit">
+			<Setter Property="Background" Value="LightBlue"></Setter>
+			<Setter Property="HorizontalContentAlignment" Value="Right"></Setter>
+
+			<Style Selector="^:pointerover /template/ Border">
+				<Setter Property="Background" Value="LightBlue"/>
+			</Style>
+			<Style Selector="^:focus /template/ Border">
+				<Setter Property="Background" Value="LightBlue"/>
+				<Setter Property="BorderBrush" Value="Black"/>
+			</Style>
+
+	</Style>
+
+
+
+
+
+		<!--<Style Selector="Path#svgLockStatus">
+		<Setter Property="VerticalAlignment" Value="Center"/>
+		<Setter Property="HorizontalAlignment" Value="Stretch"/>
+
+		<Style Selector="^.lock">
+		<Setter Property="Fill" Value="Red"/>
+		<Setter Property="Data" Value="M8 0a4 4 0 0 1 4 4v2.05a2.5 2.5 0 0 1 2 2.45v5a2.5 2.5 0 0 1-2.5 2.5h-7A2.5 2.5 0 0 1 2 13.5v-5a2.5 2.5 0 0 1 2-2.45V4a4 4 0 0 1 4-4m0 1a3 3 0 0 0-3 3v2h6V4a3 3 0 0 0-3-3"/>
+		</Style>
+		<Style Selector="^.unlock">
+		<Setter Property="Fill" Value="Green"/>
+		<Setter Property="Data" Value="M12 0a4 4 0 0 1 4 4v2.5h-1V4a3 3 0 1 0-6 0v2h.5A2.5 2.5 0 0 1 12 8.5v5A2.5 2.5 0 0 1 9.5 16h-7A2.5 2.5 0 0 1 0 13.5v-5A2.5 2.5 0 0 1 2.5 6H8V4a4 4 0 0 1 4-4"/>
+		</Style>
+		</Style>-->
+
+
+		<Style Selector="Button#FastReadingStartStop">
 			<Setter Property="Width" Value="32"/>
 			<Setter Property="Height" Value="32"/>
 
 
-           
-             <Style Selector="^ > Viewbox">
+
+			<Style Selector="^ > Viewbox">
 				<Setter Property="Width" Value="25"/>
-			    <Setter Property="Height" Value="25"/>
+				<Setter Property="Height" Value="25"/>
 
 
-                 <Style Selector="^ > Path">
-                    <Setter Property="Width" Value="16"/>
-			        <Setter Property="Height" Value="16"/>
-                 </Style>
+				<Style Selector="^ > Path">
+					<Setter Property="Width" Value="16"/>
+					<Setter Property="Height" Value="16"/>
+				</Style>
 
-             </Style>
-
-
+			</Style>
 
 
 
-             <Style Selector="^[Tag=True] > Viewbox > Path">
-                <Setter Property="Fill" Value="Red"/>
+
+
+			<Style Selector="^[Tag=True] > Viewbox > Path">
+				<Setter Property="Fill" Value="Red"/>
 				<Setter Property="Data" Value="M5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5A1.5 1.5 0 0 1 5 3.5" />
-            </Style>
+			</Style>
 
-             <Style Selector="^[Tag=False] > Viewbox > Path">
-                <Setter Property="Fill" Value="Green"/>
+			<Style Selector="^[Tag=False] > Viewbox > Path">
+				<Setter Property="Fill" Value="Green"/>
 				<Setter Property="Data" Value="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393" />
-            </Style>
-             
-
-
-         </Style>
+			</Style>
 
 
 
-     
-        
+		</Style>
 
 
 
-    </Window.Styles>
-    <Window.Resources>
-        <converters:isLockedStatusBoolToButtonContentConverter x:Key="isLockedStatusBoolToButtonContentConverter"/>
-        <converters:OperatingModeEnumToStringConverter x:Key="OperatingModeEnumToStringConverter"/>
-        <converters:FastReadTypeEnumToStringConverter x:Key="FastReadTypeEnumToStringConverter"/>
-
-    </Window.Resources>
-    
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="40"/>
-        </Grid.RowDefinitions>
-
-
-        <!--Volt-->
-        <Border Grid.Row="0" Grid.Column="0" Margin="10"  Padding="10">
-            <StackPanel>
-                <Label Content="Volt" FontSize="24" HorizontalAlignment="Center"/>
-
-                <Grid HorizontalAlignment="Stretch">
-                    <Grid.ColumnDefinitions>
-                        
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="20"/>
-                        <ColumnDefinition Width="30"/>
-                    </Grid.ColumnDefinitions>
-
-                    <TextBox x:Name="entryV_RT" Text="{Binding OwonSerialCom.VoltageRT}" Grid.Column="0" Classes="ReadOnly FloatVal"/>
-                    <Label Content="V" Grid.Column="1"  />
-                     <controls:Led 
-                        Diameter="25" 
-                        OnColor="#FF0000" 
-                        OffColor="#770000"
-                        Text="OV" 
-                        TextColor="#000000"
-                        IsOn="{Binding OwonSerialCom.OverVoltage}" 
-                        Grid.Row="0" Grid.Column="2"
-                        />
-                </Grid>
-
-                
-                <Border Height="1" Background="Gray" Margin="0,10" />
-                <Grid HorizontalAlignment="Stretch">
-                    <Grid.ColumnDefinitions>
-                 
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="50"/>
-
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-
-
-                    <TextBox x:Name="entryV"  Classes="ReadOnly FloatVal" Grid.Row="0" Grid.Column="0" Text="{Binding OwonSerialCom.Voltage}" />
-                    <Label VerticalAlignment="Center" Content="V"  Grid.Row="0" Grid.Column="1"/>
-                   
-	
-                    
 
 
 
-                    <TextBox x:Name="entryVStop"  Classes="ReadOnly FloatVal" Grid.Row="1" Grid.Column="0" Text="{Binding OwonSerialCom.VoltageLimit}"/>
-                    <Label VerticalAlignment="Center" Content="V Stop"  Grid.Row="1" Grid.Column="1" />
-                </Grid>
-            </StackPanel>
-        </Border>
-
-        <!--Current-->
-        <Border Grid.Row="0" Grid.Column="1" Margin="10"  Padding="10">
-            <StackPanel>
-                <Label Content="Current" FontSize="24" HorizontalAlignment="Center"/>
-                <Grid HorizontalAlignment="Stretch">
-                    <Grid.ColumnDefinitions>
-     
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="20"/>
-                        <ColumnDefinition Width="30"/>
-                    </Grid.ColumnDefinitions>
-
-                    <TextBox x:Name="entryC_RT" Grid.Column="0" Classes="ReadOnly FloatVal" Text="{Binding OwonSerialCom.CurrentRT}" />
-                    <Label Content="A" Grid.Column="1"/>
-                    <controls:Led 
-                        Diameter="25" 
-                        OnColor="#FF0000" 
-                        OffColor="#770000"
-                        Text="OC" 
-                        TextColor="#000000"
-                        IsOn="{Binding OwonSerialCom.OverCurrent}" 
-    
-                        Grid.Row="0" Grid.Column="3"
-                        />
-                </Grid>
-
-                <Border Height="1" Background="Gray" Margin="0,10" />
-                <Grid HorizontalAlignment="Stretch">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="50"/>
-
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
 
 
-                   
-                    <TextBox x:Name="entryC" Classes="ReadOnly FloatVal"  Grid.Row="0" Grid.Column="0" Text="{Binding OwonSerialCom.Current}" DoubleTapped="entryTxt_DoubleTapped" />
-                    <Label VerticalAlignment="Center" Content="A"  Grid.Row="0" Grid.Column="1"/>
-                     
+	</Window.Styles>
+	<Window.Resources>
+		<converters:isLockedStatusBoolToButtonContentConverter x:Key="isLockedStatusBoolToButtonContentConverter"/>
+		<converters:OperatingModeEnumToStringConverter x:Key="OperatingModeEnumToStringConverter"/>
+		<converters:FastReadTypeEnumToStringConverter x:Key="FastReadTypeEnumToStringConverter"/>
+
+	</Window.Resources>
+
+	<Grid>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="*"/>
+			<ColumnDefinition Width="*"/>
+			<ColumnDefinition Width="*"/>
+			<ColumnDefinition Width="*"/>
+		</Grid.ColumnDefinitions>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="40"/>
+		</Grid.RowDefinitions>
 
 
+		<!--Volt-->
+		<Border Grid.Row="0" Grid.Column="0" Margin="10"  Padding="10">
+			<StackPanel>
+				<Label Content="Volt" FontSize="24" HorizontalAlignment="Center"/>
 
-                    
-                    <TextBox x:Name="entryCStop" Classes="ReadOnly FloatVal"  Grid.Row="1" Grid.Column="0" Text="{Binding OwonSerialCom.CurrentLimit, Mode=OneWay}"
-                             DoubleTapped="entryTxt_DoubleTapped">
-                        </TextBox>
-                    <Label VerticalAlignment="Center" Content="A Stop"  Grid.Row="1" Grid.Column="1"/>
-                </Grid>
-            </StackPanel>
-        </Border>
+				<Grid HorizontalAlignment="Stretch">
+					<Grid.ColumnDefinitions>
 
-        <!--Power-->
-        <Border Grid.Row="0" Grid.Column="2" Margin="10"  Padding="10">
-            <StackPanel>
-                <Label Content="Power" FontSize="24" HorizontalAlignment="Center"/>
-                <Grid HorizontalAlignment="Stretch">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="45"/>
-                    </Grid.ColumnDefinitions>
+						<ColumnDefinition Width="*"/>
+						<ColumnDefinition Width="20"/>
+						<ColumnDefinition Width="30"/>
+					</Grid.ColumnDefinitions>
 
-                    <TextBox x:Name="entryP_RT" Grid.Column="0" Classes="ReadOnly FloatVal" Text="{Binding OwonSerialCom.PowerRT}"/>
-                    <Label Content="W" Grid.Column="1" />
-                </Grid>
-
-
-                <Border Height="1" Background="Gray" Margin="0,10" />
-
-            </StackPanel>
-        </Border>
-
-       
-
-        <!--Controls -->
-         <StackPanel Grid.Row="0" Grid.Column="3">
-            <Button Content="On/Off"  x:Name="btnOnOff" Margin="0 40 0 10" Tag="{Binding OwonSerialCom.IsPowered}" Click="btnOnOff_Click" />
-             <controls:Led 
-                        Diameter="25" 
-                        OnColor="#FF0000" 
-                        OffColor="#770000"
-                        Text="OT" 
-                        TextColor="#000000"
-                        IsOn="{Binding OwonSerialCom.OverTemperature}" 
-                        HorizontalAlignment="Left"
-
-                        />
-             <StackPanel Orientation="Horizontal" >
-                  <Label Content="Mode:"  />
-				  <Label Content="{Binding OwonSerialCom.OperatingMode,  Converter={StaticResource OperatingModeEnumToStringConverter}}" 
-                        />
-             </StackPanel>
-             <Border Height="1" Background="Gray" Margin="0,10" />       
-                  
-             <Label Content="Fast read data"  />
-
-             <StackPanel Orientation="Horizontal" >
-				<ComboBox x:Name="FastReadDataTypeCombo" Width="120" ItemsSource="{Binding OwonSerialCom.FastReadTypeEnumValues}">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Converter={StaticResource FastReadTypeEnumToStringConverter}}"/>
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
-                 <Button x:Name="FastReadingStartStop"  Tag="{Binding OwonSerialCom.IsFastReadingServiceRunning}" Click="FastReadingStartStop_Click">
-                      <Viewbox Stretch="Uniform">
-                          <Path ></Path>
-					 </Viewbox>
-                     
-                 </Button>
-
-                  
-
-             </StackPanel>
-
-            
-              
-
-         </StackPanel>
-
-        <!--Connection-->
-        <Border Grid.Row="2" Grid.Column="0" Margin="10"  Padding="10">
-            <StackPanel>
-                <ComboBox x:Name="comboBoxPorts" Width="150" Height="30" Margin="0,0,0,10"/>
-                <Button Content="Connect"  x:Name="btnConnect" Width="150" Click="btnConnect_Click" />
-            </StackPanel>
-        </Border>
+					<TextBox x:Name="entryV_RT" Text="{Binding OwonSerialCom.VoltageRT}" Grid.Column="0" Classes="ReadOnly FloatVal"/>
+					<Label Content="V" Grid.Column="1"  />
+					<controls:Led
+					Diameter="25"
+					OnColor="#FF0000"
+					OffColor="#770000"
+					Text="OV"
+					TextColor="#000000"
+					IsOn="{Binding OwonSerialCom.OverVoltage}"
+					Grid.Row="0" Grid.Column="2"
+					/>
+				</Grid>
 
 
-        <!--Status Bar-->
-        <Border Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="4"  BorderThickness="1 1 1 0" BorderBrush="#FF3A3A3A" Background="#FFEDEDED" Padding="2">
+				<Border Height="1" Background="Gray" Margin="0,10" />
+				<Grid HorizontalAlignment="Stretch">
+					<Grid.ColumnDefinitions>
 
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="20"/>
-                    <ColumnDefinition Width="66"/>
+						<ColumnDefinition Width="*"/>
+						<ColumnDefinition Width="50"/>
 
-                </Grid.ColumnDefinitions>
-
-                <StackPanel Orientation="Horizontal" >
-                    <Label Content="Type" VerticalAlignment="Center"></Label>
-                    <TextBox  Width="100" x:Name="txtType" IsReadOnly="True" Margin="0 0 15 0" Text="{Binding OwonSerialCom.DeviceType}"></TextBox>
-
-                    <Label Content="Firmware" VerticalAlignment="Center"></Label>
-                    <TextBox  Width="100" x:Name="txtFirmware" IsReadOnly="True" Margin="0 0 15 0" Text="{Binding OwonSerialCom.Firmware}"></TextBox>
-
-                    <Label Content="SN" VerticalAlignment="Center"></Label>
-                    <TextBox  Width="100" x:Name="txtSN" IsReadOnly="True" Margin="0 0 15 0" Text="{Binding OwonSerialCom.SerialNumber}"></TextBox>
-
-                    
-
-                </StackPanel>
-                
-                 
+					</Grid.ColumnDefinitions>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="*"/>
+						<RowDefinition Height="*"/>
+					</Grid.RowDefinitions>
 
 
-                <controls:Padlock 
-                    x:Name="svgLockStatus"
-                    IsLocked="{Binding OwonSerialCom.IsLocked}" 
-                    VerticalAlignment="Center" 
-                    Grid.Column="1"
-                    
-                    />
-                 
+					<TextBox x:Name="entryV"  Classes="ReadOnly FloatVal" Grid.Row="0" Grid.Column="0" Text="{Binding OwonSerialCom.Voltage}" />
+					<Label VerticalAlignment="Center" Content="V"  Grid.Row="0" Grid.Column="1"/>
 
 
 
-                <Button x:Name="btnLock"
-                        Classes="lock" 
-                        Grid.Column="2" 
-                        Content="{Binding OwonSerialCom.IsLocked,  Converter={StaticResource isLockedStatusBoolToButtonContentConverter}}" 
-                        HorizontalAlignment="Stretch" Click="btnLock_Click" />
-                
 
-            </Grid>
 
-        </Border>
 
-        
+					<TextBox x:Name="entryVStop"  Classes="ReadOnly FloatVal" Grid.Row="1" Grid.Column="0" Text="{Binding OwonSerialCom.VoltageLimit}"/>
+					<Label VerticalAlignment="Center" Content="V Stop"  Grid.Row="1" Grid.Column="1" />
+				</Grid>
+			</StackPanel>
+		</Border>
 
-        <!-- DEMO -->
-        
-        <Button  Grid.Row="1" Grid.Column="0" Content="t1"   Width="50" x:Name="t1" Click="t1_Click" />
-        <Button Grid.Row="1" Grid.Column="1"  Content="t2"   Width="50" x:Name="t2" Click="t2_Click"/>
-        <Button Grid.Row="1" Grid.Column="2"  Content="t3"   Width="50" x:Name="t3" Click="t3_ClickAsync" />
-        <Button Grid.Row="1" Grid.Column="3"  Content="t4"   Width="50" x:Name="t4" Click="t4_Click" />
-        <TextBox x:Name="demoText" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Height="150" />
-        <TextBox AcceptsReturn="True"
-                 TextWrapping="Wrap"
-                 x:Name="demoText1" Grid.Row="2" Grid.Column="3"  Height="150" />
+		<!--Current-->
+		<Border Grid.Row="0" Grid.Column="1" Margin="10"  Padding="10">
+			<StackPanel>
+				<Label Content="Current" FontSize="24" HorizontalAlignment="Center"/>
+				<Grid HorizontalAlignment="Stretch">
+					<Grid.ColumnDefinitions>
 
-    </Grid>
+						<ColumnDefinition Width="*"/>
+						<ColumnDefinition Width="20"/>
+						<ColumnDefinition Width="30"/>
+					</Grid.ColumnDefinitions>
+
+					<TextBox x:Name="entryC_RT" Grid.Column="0" Classes="ReadOnly FloatVal" Text="{Binding OwonSerialCom.CurrentRT}" />
+					<Label Content="A" Grid.Column="1"/>
+					<controls:Led
+					Diameter="25"
+					OnColor="#FF0000"
+					OffColor="#770000"
+					Text="OC"
+					TextColor="#000000"
+					IsOn="{Binding OwonSerialCom.OverCurrent}"
+
+					Grid.Row="0" Grid.Column="3"
+					/>
+				</Grid>
+
+				<Border Height="1" Background="Gray" Margin="0,10" />
+				<Grid HorizontalAlignment="Stretch">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="*"/>
+						<ColumnDefinition Width="50"/>
+
+					</Grid.ColumnDefinitions>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="*"/>
+						<RowDefinition Height="*"/>
+					</Grid.RowDefinitions>
+
+
+
+					<TextBox x:Name="entryC" Classes="ReadOnly FloatVal"  Grid.Row="0" Grid.Column="0" Text="{Binding OwonSerialCom.Current}" DoubleTapped="entryTxt_DoubleTapped" />
+					<Label VerticalAlignment="Center" Content="A"  Grid.Row="0" Grid.Column="1"/>
+
+
+
+
+
+					<TextBox x:Name="entryCStop" Classes="ReadOnly FloatVal"  Grid.Row="1" Grid.Column="0" Text="{Binding OwonSerialCom.CurrentLimit, Mode=OneWay}"
+							 DoubleTapped="entryTxt_DoubleTapped">
+					</TextBox>
+					<Label VerticalAlignment="Center" Content="A Stop"  Grid.Row="1" Grid.Column="1"/>
+				</Grid>
+			</StackPanel>
+		</Border>
+
+		<!--Power-->
+		<Border Grid.Row="0" Grid.Column="2" Margin="10"  Padding="10">
+			<StackPanel>
+				<Label Content="Power" FontSize="24" HorizontalAlignment="Center"/>
+				<Grid HorizontalAlignment="Stretch">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="*"/>
+						<ColumnDefinition Width="45"/>
+					</Grid.ColumnDefinitions>
+
+					<TextBox x:Name="entryP_RT" Grid.Column="0" Classes="ReadOnly FloatVal" Text="{Binding OwonSerialCom.PowerRT}"/>
+					<Label Content="W" Grid.Column="1" />
+				</Grid>
+
+
+				<Border Height="1" Background="Gray" Margin="0,10" />
+
+			</StackPanel>
+		</Border>
+
+
+
+		<!--Controls -->
+		<StackPanel Grid.Row="0" Grid.Column="3">
+			<Button Content="On/Off"  x:Name="btnOnOff" Margin="0 40 0 10" Tag="{Binding OwonSerialCom.IsPowered}" Click="btnOnOff_Click" />
+			<controls:Led
+			Diameter="25"
+			OnColor="#FF0000"
+			OffColor="#770000"
+			Text="OT"
+			TextColor="#000000"
+			IsOn="{Binding OwonSerialCom.OverTemperature}"
+			HorizontalAlignment="Left"
+
+			/>
+			<StackPanel Orientation="Horizontal" >
+				<Label Content="Mode:"  />
+				<Label Content="{Binding OwonSerialCom.OperatingMode,  Converter={StaticResource OperatingModeEnumToStringConverter}}"
+					   />
+			</StackPanel>
+			<Border Height="1" Background="Gray" Margin="0,10" />
+
+			<Label Content="Fast read data"  />
+
+			<StackPanel Orientation="Horizontal" >
+				
+
+
+				<ComboBox x:Name="FastReadDataTypeCombo"
+						  Width="120"
+						  ItemsSource="{Binding OwonSerialCom.FastReadTypeEnumValues}">
+					<ComboBox.ItemTemplate>
+						<DataTemplate>
+							<TextBlock Text="{Binding Converter={StaticResource FastReadTypeEnumToStringConverter}}"/>
+						</DataTemplate>
+					</ComboBox.ItemTemplate>
+
+					<ComboBox.SelectionBoxItemTemplate>
+						<DataTemplate>
+							<TextBlock Text="{Binding Converter={StaticResource FastReadTypeEnumToStringConverter}}"/>
+						</DataTemplate>
+					</ComboBox.SelectionBoxItemTemplate>
+				</ComboBox>
+
+
+
+				<Button x:Name="FastReadingStartStop"  Tag="{Binding OwonSerialCom.IsFastReadingServiceRunning}" Click="FastReadingStartStop_Click">
+					<Viewbox Stretch="Uniform">
+						<Path ></Path>
+					</Viewbox>
+
+				</Button>
+			</StackPanel>
+
+			<StackPanel Orientation="Horizontal" >
+
+			</StackPanel>
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="100"/>
+					<ColumnDefinition Width="60"/>
+					<ColumnDefinition Width="*"/>
+				</Grid.ColumnDefinitions>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="*"/>
+					<RowDefinition Height="*"/>
+					<RowDefinition Height="*"/>
+				</Grid.RowDefinitions>
+
+				<Label Content="Num Values:" Grid.Column="0" Grid.Row="0"></Label>
+				<Label x:Name="FastReadValuesNumber" HorizontalContentAlignment="Right" Content="0" Grid.Column="1" Grid.Row="0"></Label>
+
+				<Label Content="Consumed:" Grid.Column="0" Grid.Row="1"></Label>
+				<Label x:Name="FastReadConsumedValue" HorizontalContentAlignment="Right" Content="0" Grid.Column="1" Grid.Row="1"></Label>
+				<Label x:Name="FastReadConsumedUM" Content="mAh" Grid.Column="2" Grid.Row="1"></Label>
+
+
+			</Grid>
+
+			<!-- -->
+
+
+
+
+		</StackPanel>
+
+		<!--Connection-->
+		<Border Grid.Row="2" Grid.Column="0" Margin="10"  Padding="10">
+			<StackPanel>
+				<ComboBox x:Name="comboBoxPorts" Width="150" Height="30" Margin="0,0,0,10"/>
+				<Button Content="Connect"  x:Name="btnConnect" Width="150" Click="btnConnect_Click" />
+			</StackPanel>
+		</Border>
+
+
+		<!--Status Bar-->
+		<Border Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="4"  BorderThickness="1 1 1 0" BorderBrush="#FF3A3A3A" Background="#FFEDEDED" Padding="2">
+
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="*"/>
+					<ColumnDefinition Width="20"/>
+					<ColumnDefinition Width="66"/>
+
+				</Grid.ColumnDefinitions>
+
+				<StackPanel Orientation="Horizontal" >
+					<Label Content="Type" VerticalAlignment="Center"></Label>
+					<TextBox  Width="100" x:Name="txtType" IsReadOnly="True" Margin="0 0 15 0" Text="{Binding OwonSerialCom.DeviceType}"></TextBox>
+
+					<Label Content="Firmware" VerticalAlignment="Center"></Label>
+					<TextBox  Width="100" x:Name="txtFirmware" IsReadOnly="True" Margin="0 0 15 0" Text="{Binding OwonSerialCom.Firmware}"></TextBox>
+
+					<Label Content="SN" VerticalAlignment="Center"></Label>
+					<TextBox  Width="100" x:Name="txtSN" IsReadOnly="True" Margin="0 0 15 0" Text="{Binding OwonSerialCom.SerialNumber}"></TextBox>
+
+
+
+				</StackPanel>
+
+
+
+
+				<controls:Padlock
+				x:Name="svgLockStatus"
+				IsLocked="{Binding OwonSerialCom.IsLocked}"
+				VerticalAlignment="Center"
+				Grid.Column="1"
+
+				/>
+
+
+
+
+				<Button x:Name="btnLock"
+						Classes="lock"
+						Grid.Column="2"
+						Content="{Binding OwonSerialCom.IsLocked,  Converter={StaticResource isLockedStatusBoolToButtonContentConverter}}"
+						HorizontalAlignment="Stretch" Click="btnLock_Click" />
+
+
+			</Grid>
+
+		</Border>
+
+
+
+		<!-- DEMO -->
+
+
+	</Grid>
 </Window>
