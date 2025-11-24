@@ -1,15 +1,16 @@
 ﻿using Microsoft.VisualBasic;
+using OWON_GUI.Converter;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO.Ports;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading.Tasks;
-using System.Diagnostics;
-using OWON_GUI.Converter;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace OWON_GUI.Classes
 {
@@ -345,6 +346,9 @@ namespace OWON_GUI.Classes
         #endregion
 
 
+        public Array FastReadTypeEnumValues => Enum.GetValues(typeof(FastReadType));
+
+
 
         //------------------------------------------------------------------------
         //------------------------------------------------------------------------
@@ -354,6 +358,11 @@ namespace OWON_GUI.Classes
 
         private CancellableTask ContinuosLockTask = null;
         private CancellableTask NormalReadDataTask = null;
+
+        public bool IsFastReadingServiceRunning
+        { 
+            get => OwnFastReadingService.Instance.IsRunning;  
+        }
 
                 
 
@@ -452,39 +461,46 @@ namespace OWON_GUI.Classes
         //TODO: mettere private
         async public Task acquireRTValues()
         {
-            if (DateTime.Now > invalidationDate)
+            try
             {
-                String str = await comManager.makeRequest("MEAS:ALL:INFO?\n");
-                String[] parts = str.Split(',');
-                _voltageRT = float.Parse(parts[0], System.Globalization.CultureInfo.InvariantCulture);
-                _currentRT = float.Parse(parts[1], System.Globalization.CultureInfo.InvariantCulture);
-                _powerRT = float.Parse(parts[2], System.Globalization.CultureInfo.InvariantCulture);
-                //1 -> current
-                //2 -> watt
-                //OFF,OFF,OFF,0
+                if (DateTime.Now > invalidationDate)
+                {
+                    String str = await comManager.makeRequest("MEAS:ALL:INFO?\n");
+                    String[] parts = str.Split(',');
+                    _voltageRT = float.Parse(parts[0], System.Globalization.CultureInfo.InvariantCulture);
+                    _currentRT = float.Parse(parts[1], System.Globalization.CultureInfo.InvariantCulture);
+                    _powerRT = float.Parse(parts[2], System.Globalization.CultureInfo.InvariantCulture);
+                    //1 -> current
+                    //2 -> watt
+                    //OFF,OFF,OFF,0
 
-                _overVoltage = parts[3] == "ON" || parts[3] == "1";
-                _overCurrent = parts[4] == "ON" || parts[4] == "1";
-                _overTemperature = parts[5] == "ON" || parts[5] == "1";
+                    _overVoltage = parts[3] == "ON" || parts[3] == "1";
+                    _overCurrent = parts[4] == "ON" || parts[4] == "1";
+                    _overTemperature = parts[5] == "ON" || parts[5] == "1";
 
 
-                _operatingMode = (OperatingModeEnum)int.Parse(parts[6]);
+                    _operatingMode = (OperatingModeEnum)int.Parse(parts[6]);
 
-                if (_operatingMode == OperatingModeEnum.StandBy || _operatingMode == OperatingModeEnum.Failure)
-                    _isPowered = false;
-                else
-                    _isPowered = true;
+                    if (_operatingMode == OperatingModeEnum.StandBy || _operatingMode == OperatingModeEnum.Failure)
+                        _isPowered = false;
+                    else
+                        _isPowered = true;
 
-                invalidationDate = DateTime.Now + TimeSpan.FromSeconds(1);
+                    invalidationDate = DateTime.Now + TimeSpan.FromSeconds(1);
 
-                OnPropertyChanged(nameof(VoltageRT));
-                OnPropertyChanged(nameof(CurrentRT));
-                OnPropertyChanged(nameof(PowerRT));
-                OnPropertyChanged(nameof(OverVoltage));
-                OnPropertyChanged(nameof(OverCurrent));
-                OnPropertyChanged(nameof(OverTemperature));
-                OnPropertyChanged(nameof(OperatingMode));
-                OnPropertyChanged(nameof(IsPowered));
+                    OnPropertyChanged(nameof(VoltageRT));
+                    OnPropertyChanged(nameof(CurrentRT));
+                    OnPropertyChanged(nameof(PowerRT));
+                    OnPropertyChanged(nameof(OverVoltage));
+                    OnPropertyChanged(nameof(OverCurrent));
+                    OnPropertyChanged(nameof(OverTemperature));
+                    OnPropertyChanged(nameof(OperatingMode));
+                    OnPropertyChanged(nameof(IsPowered));
+                }
+            }
+            catch(Exception _)
+            {
+
             }
         }
 
@@ -518,7 +534,7 @@ namespace OWON_GUI.Classes
             if (float.TryParse(s, System.Globalization.CultureInfo.InvariantCulture, out v))
                 return v;
             else
-                throw new OWONProtocolException("CURR? ( CURRent? ) string not correctly formatted");
+                throw new OWONProtocolException("CURR? ( CURRent? ) string not correctly formatted: "+s);
              
         }
 
@@ -569,24 +585,33 @@ namespace OWON_GUI.Classes
 
         async public void StartFastReadData(FastReadType type)
         {
+
             OwnFastReadingService frs = OwnFastReadingService.Instance;
             if (frs.IsRunning )
                 throw new InvalidOperationException("Can't start FastReadData because the service is already running.");
 
+            await StopNormalReadData();
+
             frs.setCom(comManager);
             await frs.Start(type);
+            OnPropertyChanged(nameof(IsFastReadingServiceRunning));
 
         }
 
         async public Task<List<FastDataRawEntry>> StopFastReadData()
         {
             OwnFastReadingService frs = OwnFastReadingService.Instance;
-            return await frs.Stop();
+            List<FastDataRawEntry> tmp = await frs.Stop();
+
+            OnPropertyChanged(nameof(IsFastReadingServiceRunning));
+            await StartNormalReadData();
+            return tmp;
+
         }
 
 
 
-        async public void StartNormalReadData()
+        async public Task StartNormalReadData()
         {
             if(NormalReadDataTask!=null)
                 throw new InvalidOperationException("Can't start NormalReadData because the service is already running.");
@@ -594,21 +619,31 @@ namespace OWON_GUI.Classes
             NormalReadDataTask = new CancellableTask(async (CancellationToken ct) =>{
                 while(!ct.IsCancellationRequested)
                 {
-                    await acquireRTValues();
-                    await acquireSetupValues();
-                    await Task.Delay(1000);
+                    try
+                    {
+                        await acquireRTValues();
+                        await acquireSetupValues();
+                        await Task.Delay(1000);
+                    }
+                    catch(Exception ex)
+                    {
+                        Debug.WriteLine(ex);
+                    }
                 }
             });
 
             NormalReadDataTask.Start();
         }
 
-        async public void StopNormalReadData()
+        async public Task StopNormalReadData()
         {
-            if(NormalReadDataTask==null) throw new InvalidOperationException("Can't stop NormalReadData because the service is already stopped.");
+            if (NormalReadDataTask == null) return;
+                if (NormalReadDataTask==null) throw new InvalidOperationException("Can't stop NormalReadData because the service is already stopped.");
 
             NormalReadDataTask.Cancel();
             await NormalReadDataTask.InnerTask;
+
+            NormalReadDataTask = null;
         }
 
     }

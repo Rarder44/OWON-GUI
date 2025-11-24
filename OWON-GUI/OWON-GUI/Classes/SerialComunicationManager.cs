@@ -73,7 +73,7 @@ namespace OWON_GUI.Classes
         {
             
 
-            Debug.WriteLine(request);
+            Debug.WriteLine(request.Trim());
             await semaphore.WaitAsync();
             Debug.WriteLine("S WAIT 1");
 
@@ -85,12 +85,13 @@ namespace OWON_GUI.Classes
             {
                 com.Write(request);
                 String s = await com.ReadLineAsync();
+                Debug.WriteLine(s.Trim());
                 return s;
             }
             finally
             {
                 semaphore.Release();
-                Debug.WriteLine("S RELEASE 1");
+                Debug.WriteLine("S RELEASE 1\n");
 
             }
         }
@@ -101,7 +102,7 @@ namespace OWON_GUI.Classes
            
 
 
-            Debug.WriteLine(request);
+            Debug.WriteLine(request.Trim());
 
             await semaphore.WaitAsync();
             Debug.WriteLine("S WAIT 2");
@@ -116,7 +117,7 @@ namespace OWON_GUI.Classes
             finally
             {
                 semaphore.Release();
-                Debug.WriteLine("S RELEASE 2");
+                Debug.WriteLine("S RELEASE 2\n");
 
             }
         }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -12,10 +13,15 @@ namespace OWON_GUI.Classes
         private readonly CancellationTokenSource _cts;
         public Task InnerTask { get; }
 
-        public CancellableTask(Action<CancellationToken> action, CancellationTokenSource? cts = null)
+        public CancellableTask(Func<CancellationToken, Task> action, CancellationTokenSource? cts = null)
         {
             _cts = cts ?? new CancellationTokenSource();
-            InnerTask = new Task(() => action(_cts.Token), _cts.Token);
+            InnerTask = new Task(() => {
+                
+                action(_cts.Token).Wait();
+                Debug.WriteLine("TASK FINITO");
+                
+                }, _cts.Token);
         }
 
         /// <summary>

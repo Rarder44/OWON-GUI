@@ -6,6 +6,7 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using OWON_GUI.Classes;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
@@ -23,7 +24,9 @@ namespace OWON_GUI
         public OwonSerialCom OwonSerialCom { get { return _owonSerialCom; } }
 
 
-        
+
+
+
 
 
         public MainWindow()
@@ -48,7 +51,7 @@ namespace OWON_GUI
             {
                 _owonSerialCom.StartNormalReadData();
             }
-            
+
         }
 
 
@@ -94,8 +97,8 @@ namespace OWON_GUI
                 }
                 else if (e.Key == Avalonia.Input.Key.Enter)
                 {
-                    
-                    float v = float.Parse(Cloned.Text.Replace(".",","));
+
+                    float v = float.Parse(Cloned.Text.Replace(".", ","));
                     if (tb == entryC)
                         OwonSerialCom.Current = v;
                     if (tb == entryCStop)
@@ -160,19 +163,12 @@ namespace OWON_GUI
         FastReadType type = FastReadType.Current_Voltage_Power;
         private void t2_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            //_owonSerialCom.StartFastReadData(type);
-            //entryCStop.BindingRestore();
-
-
+            
         }
 
         private async void t3_ClickAsync(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            List<FastDataRawEntry> res = await _owonSerialCom.StopFastReadData();
-            foreach (var item in res)
-            {
-                demoText.Text += new FastDataEntry(item, type) + "\n";
-            }
+            
 
         }
 
@@ -184,9 +180,33 @@ namespace OWON_GUI
 
         }
 
+        async private void FastReadingStartStop_Click(object? sender, RoutedEventArgs e)
+        {
+            if (FastReadDataTypeCombo.SelectedItem == null)
+                return;
+
+            FastReadType type = (FastReadType)FastReadDataTypeCombo.SelectedItem;
+
+            if( !_owonSerialCom.IsFastReadingServiceRunning)
+            {
+                //START
+                FastReadDataTypeCombo.IsEditable= false;
+                _owonSerialCom.StartFastReadData(type);
+
+            }
+            else
+            {
+                //STOP
+                List<FastDataRawEntry> res = await _owonSerialCom.StopFastReadData();
+                FastReadDataTypeCombo.IsEditable = true;
 
 
+                foreach (var item in res)
+                {
+                    demoText.Text += new FastDataEntry(item, type) + "\n";
+                }
+            }
 
-
+        }
     }
 }
