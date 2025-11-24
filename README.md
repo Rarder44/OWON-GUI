@@ -11,18 +11,23 @@ This tool provides an intuitive interface for real-time data visualization, remo
 - Lock and unlock manual control on the device even when connected via serial port  
 - Real-time reading and display of voltage, current, and power output  
 - High-frequency data acquisition with CSV export support  
-- Responsive and lightweight GUI built with .NET (WPF)  
-- Configurable serial port parameters (baud rate, COM port selection, etc.)  
-- Automatic reconnection and error handling for stable operation  
+- Responsive and lightweight GUI built with .NET ([Avalonia UI](https://avaloniaui.net/))
+
 
 ---
 
 
 ## Usage
 
-1. Connect your Owon SPE6103 to the PC via USB or serial cable.  
+1. Connect your Owon SPE6103 to the PC via USB.  
 2. Launch the tool and select the correct COM port. 
 3. Connect
+
+---
+
+## TODO:
+- Configurable serial port parameters (baud rate, COM port selection, etc.)  
+- Automatic reconnection and error handling for stable operation  
 
 ---
 
