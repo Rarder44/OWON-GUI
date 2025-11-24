@@ -288,10 +288,11 @@ namespace OWON_GUI.Classes
             var sb = new StringBuilder();
 
 
-            sb.AppendLine($"Volt{separator}Ampere{separator}Watt");
+            sb.AppendLine($"Timestamp(ms){separator}Volt{separator}Ampere{separator}Watt");
             foreach (var row in entrys)
             {
                 var fields = new List<String>(){
+                     row.Millis.ToString(),
                      row.Voltage.ToString(),
                      row.Current.ToString(),
                      row.Power.ToString(),

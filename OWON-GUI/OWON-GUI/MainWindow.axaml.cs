@@ -37,22 +37,14 @@ namespace OWON_GUI
 
 
             comboBoxPorts.ItemsSource = SerialPort.GetPortNames().ToList();
+            if(comboBoxPorts.Items.Count > 0 )
+                comboBoxPorts.SelectedIndex = 0;
 
-            if (!Design.IsDesignMode)
-            {
-                comboBoxPorts.ItemsSource = SerialPort.GetPortNames().ToList();
-                _owonSerialCom.init(SerialPort.GetPortNames().ToList().FirstOrDefault("COM3"));
-            }
 
 
 
             this.DataContext = this;
 
-
-            if (!Design.IsDesignMode)
-            {
-                _owonSerialCom.StartNormalReadData();
-            }
 
             OwonFastReadingService.Instance.ReadingUpdate += Instance_ReadingUpdate; ;
 
@@ -107,8 +99,14 @@ namespace OWON_GUI
 
         private void btnConnect_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
+            if (comboBoxPorts.SelectedItem == null)
+                return;
 
 
+            _owonSerialCom.init((String)comboBoxPorts.SelectedItem);
+
+            btnConnect.IsEnabled=false;
+            comboBoxPorts.IsEnabled=false;
         }
 
 
@@ -147,67 +145,11 @@ namespace OWON_GUI
         }
 
 
-        private async void t1_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
-        {
-            //_owonSerialCom.RawWrite("*IDN?\n");
-
-            /* Task t = Task.Run(() =>
-             {
-                 int rep = 10;
-                 string s = "";
-                 for(int i=0;i<rep;i++)
-                 {
-                     s += "*IDN?\n";
-                 }
-                 port.Write(s);
-
-                 for (int i = 0; i < rep; i++)
-                 {
-                     string resp;
-
-                     while(true)
-                     {
-                         string line = port.ReadLine();
-                         if( line==null)
-                             continue;
-
-                         resp = i + ") " + line;
-                         break;
-                     }
 
 
-                     Dispatcher.UIThread.Post(() => demoText.Text += resp);
-                 }
-
-
-             });
-            */
-            //await t;
-
-            _owonSerialCom.acquireSetupValues();
-
-
-        }
 
      
-        private void t2_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
-        {
-            
-        }
 
-        private async void t3_ClickAsync(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
-        {
-            
-
-        }
-
-        private async void t4_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
-        {
-            //_owonSerialCom.RawWrite(demoText1.Text);
-
-            _owonSerialCom.acquireRTValues();
-
-        }
 
         async private void FastReadingStartStop_Click(object? sender, RoutedEventArgs e)
         {

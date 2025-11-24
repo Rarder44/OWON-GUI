@@ -44,6 +44,16 @@ namespace OWON_GUI.Classes
 
         #region Property
 
+
+        public bool IsConnected { get
+            {
+                if(comManager==null) return false;
+                if(comManager.com == null) return false;
+                return comManager.com.IsOpen;
+            }
+        }
+
+
         private bool _isLocked  = false;
         /// <summary>
         ///  Gets or sets the state of the power supply's physical keypad
@@ -100,8 +110,8 @@ namespace OWON_GUI.Classes
                 if (comManager == null)
                     return null;
 
-
-                acquireDeviceInfo();
+                if(IsConnected)
+                    acquireDeviceInfo();
 
                 return _firmware; 
             }
@@ -128,7 +138,8 @@ namespace OWON_GUI.Classes
                 if (comManager == null)
                     return null;
 
-                acquireDeviceInfo();
+                if (IsConnected)
+                    acquireDeviceInfo();
 
                 return _type;
             }
@@ -155,7 +166,8 @@ namespace OWON_GUI.Classes
                 if (comManager == null)
                     return null;
 
-                acquireDeviceInfo();
+                if (IsConnected)
+                    acquireDeviceInfo();
 
                 return _sn;
             }
@@ -192,7 +204,7 @@ namespace OWON_GUI.Classes
         {
             get
             {
-                if (DateTime.Now > invalidationDate)
+                if (DateTime.Now > invalidationDate && IsConnected)
                 {
                     //prendi i dati 
                     acquireRTValues();
@@ -205,7 +217,7 @@ namespace OWON_GUI.Classes
         {
             get
             {
-                if (DateTime.Now > invalidationDate)
+                if (DateTime.Now > invalidationDate && IsConnected)
                 {
                     //prendi i dati 
                     acquireRTValues();
@@ -285,7 +297,7 @@ namespace OWON_GUI.Classes
         {
             get
             {
-                if (DateTime.Now > invalidationDate)
+                if (DateTime.Now > invalidationDate && IsConnected)
                 {
                     //prendi i dati 
                     acquireRTValues();
@@ -299,7 +311,7 @@ namespace OWON_GUI.Classes
         {
             get
             {
-                if (DateTime.Now > invalidationDate)
+                if (DateTime.Now > invalidationDate && IsConnected)
                 {
                     //prendi i dati 
                     acquireRTValues();
@@ -313,7 +325,7 @@ namespace OWON_GUI.Classes
         {
             get
             {
-                if (DateTime.Now > invalidationDate)
+                if (DateTime.Now > invalidationDate && IsConnected)
                 {
                     //prendi i dati 
                     acquireRTValues();
@@ -328,7 +340,7 @@ namespace OWON_GUI.Classes
         {
             get
             {
-                if (DateTime.Now > invalidationDate)
+                if (DateTime.Now > invalidationDate && IsConnected)
                 {
                     //prendi i dati 
                     acquireRTValues();
@@ -388,6 +400,7 @@ namespace OWON_GUI.Classes
 
             OwonFastReadingService.Instance.ReadingUpdate += Instance_ReadingUpdate;
 
+            StartNormalReadData();
             
         }
 
@@ -496,9 +509,10 @@ namespace OWON_GUI.Classes
 
 
 
-        //TODO: mettere private
-        async public Task acquireRTValues()
+        async private Task acquireRTValues()
         {
+            if (!IsConnected) return;
+
             try
             {
                 if (DateTime.Now > invalidationDate)

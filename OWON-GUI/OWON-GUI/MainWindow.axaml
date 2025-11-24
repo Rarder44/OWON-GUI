@@ -396,8 +396,7 @@
 		<!--Connection-->
 		<Border Grid.Row="2" Grid.Column="0" Margin="10"  Padding="10">
 			<StackPanel>
-				<ComboBox x:Name="comboBoxPorts" Width="150" Height="30" Margin="0,0,0,10"/>
-				<Button Content="Connect"  x:Name="btnConnect" Width="150" Click="btnConnect_Click" />
+				
 			</StackPanel>
 		</Border>
 
@@ -414,14 +413,25 @@
 				</Grid.ColumnDefinitions>
 
 				<StackPanel Orientation="Horizontal" >
+
+					<ComboBox x:Name="comboBoxPorts" Width="100" Height="30" Margin="0 0 15 0" VerticalAlignment="Center" />
+					<Button x:Name="btnConnect" Width="32" Click="btnConnect_Click" Margin="0 0 15 0"  VerticalAlignment="Center">
+
+						<Path Data="M6 0a.5.5 0 0 1 .5.5V3h3V.5a.5.5 0 0 1 1 0V3h1a.5.5 0 0 1 .5.5v3A3.5 3.5 0 0 1 8.5 10c-.002.434-.01.845-.04 1.22-.041.514-.126 1.003-.317 1.424a2.08 2.08 0 0 1-.97 1.028C6.725 13.9 6.169 14 5.5 14c-.998 0-1.61.33-1.974.718A1.92 1.92 0 0 0 3 16H2c0-.616.232-1.367.797-1.968C3.374 13.42 4.261 13 5.5 13c.581 0 .962-.088 1.218-.219.241-.123.4-.3.514-.55.121-.266.193-.621.23-1.09.027-.34.035-.718.037-1.141A3.5 3.5 0 0 1 4 6.5v-3a.5.5 0 0 1 .5-.5h1V.5A.5.5 0 0 1 6 0" Fill="Black" >
+							
+						</Path>
+						</Button>
+
+
+					<Border Width="1" Background="Gray" Margin="0 0 10 0" />
 					<Label Content="Type" VerticalAlignment="Center"></Label>
-					<TextBox  Width="100" x:Name="txtType" IsReadOnly="True" Margin="0 0 15 0" Text="{Binding OwonSerialCom.DeviceType}"></TextBox>
+					<TextBox  Width="100" x:Name="txtType" IsReadOnly="True" Margin="0 0 10 0" Text="{Binding OwonSerialCom.DeviceType}"></TextBox>
 
 					<Label Content="Firmware" VerticalAlignment="Center"></Label>
-					<TextBox  Width="100" x:Name="txtFirmware" IsReadOnly="True" Margin="0 0 15 0" Text="{Binding OwonSerialCom.Firmware}"></TextBox>
+					<TextBox  Width="100" x:Name="txtFirmware" IsReadOnly="True" Margin="0 0 10 0" Text="{Binding OwonSerialCom.Firmware}"></TextBox>
 
 					<Label Content="SN" VerticalAlignment="Center"></Label>
-					<TextBox  Width="100" x:Name="txtSN" IsReadOnly="True" Margin="0 0 15 0" Text="{Binding OwonSerialCom.SerialNumber}"></TextBox>
+					<TextBox  Width="100" x:Name="txtSN" IsReadOnly="True"  Text="{Binding OwonSerialCom.SerialNumber}"></TextBox>
 
 
 
