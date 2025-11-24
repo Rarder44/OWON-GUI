@@ -185,7 +185,7 @@ namespace OWON_GUI
                 }
 
                 var now = DateTime.Now;
-                string fileName = $"FastReads\\{now:yyyy-MM-dd} _ {now:HH-mm-ss}.csv";
+                string fileName = Path.Combine("FastReads", $"{now:yyyy-MM-dd} _ {now:HH-mm-ss}.csv");
 
                 var folder = System.IO.Path.GetDirectoryName(fileName);
                 if (!string.IsNullOrEmpty(folder) && !System.IO.Directory.Exists(folder))
